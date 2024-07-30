@@ -2,6 +2,14 @@ version: '3'
 name: challenge-jbr
 
 services:
+  atlas:
+    build:
+      context: .
+      dockerfile: atlas/Dockerfile
+    command: ["migrate", "apply", "-u", "postgres://postgres:pgpass@postgres:5432?search_path=public&sslmode=disable"]
+    depends_on:
+      - postgres
+
   postgres:
     image: postgres:14
     environment:
