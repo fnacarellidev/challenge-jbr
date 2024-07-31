@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/fnacarellidev/challenge-jbr/backend/.sqlcbuild/pgquery"
 	"github.com/fnacarellidev/challenge-jbr/types"
@@ -16,6 +17,11 @@ import (
 
 type Api struct {
 	Db *pgx.Conn
+}
+
+type CaseUpdate struct {
+	UpdateDate    time.Time `json:"update_date"`
+	UpdateDetails string    `json:"update_details"`
 }
 
 // todo think about case where the court has already been registered
@@ -70,6 +76,34 @@ func (api *Api) FetchCourtCase(w http.ResponseWriter, r *http.Request, ps httpro
 	w.Write(jsonBytes)
 }
 
+func (api *Api) FetchUpdatesFromCase(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	cnjLookup := ps.ByName("cnj")
+	sqlc := pgquery.New(api.Db)
+
+	rows, err := sqlc.GetCaseUpdates(context.Background(), cnjLookup)
+	if err != nil {
+		log.Println("err:", err)
+		return
+	}
+
+	var CaseUpdates []CaseUpdate
+	for _, row := range(rows) {
+		CaseUpdate := CaseUpdate{
+			UpdateDate: row.UpdateDate.Time,
+			UpdateDetails: row.UpdateDetails,
+		}
+		CaseUpdates = append(CaseUpdates, CaseUpdate)
+	}
+
+	jsonBytes, err := json.Marshal(CaseUpdates)
+	if err != nil {
+		http.Error(w, "Internal error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(jsonBytes)
+}
+
 func (api *Api) Healthcheck(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Write([]byte("Healthy"))
 }
@@ -85,6 +119,7 @@ func main() {
 	router := httprouter.New()
 	router.POST("/register_court_case", api.RegisterCourtCase)
 	router.GET("/fetch_court_case/:cnj", api.FetchCourtCase)
+	router.GET("/fetch_updates_from_case/:cnj", api.FetchUpdatesFromCase)
 	router.GET("/healthcheck", api.Healthcheck)
 	http.ListenAndServe(":8081", router)
 }
