@@ -3,13 +3,14 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"time"
 
+	"github.com/fnacarellidev/challenge-jbr/backend/.sqlcbuild/pgquery"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type CourtCase struct {
@@ -20,8 +21,12 @@ type CourtCase struct {
 	StartDate     time.Time `json:"startDate"`
 }
 
+type Api struct {
+	Db *pgx.Conn
+}
+
 // todo think about case where the court has already been registered
-func RegisterCourtCase(w http.ResponseWriter, r *http.Request) {
+func (api *Api) RegisterCourtCase(w http.ResponseWriter, r *http.Request) {
 	var courtCase CourtCase
 
 	err := json.NewDecoder(r.Body).Decode(&courtCase)
@@ -30,7 +35,21 @@ func RegisterCourtCase(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "Received info: %s", courtCase)
+	sqlc := pgquery.New(api.Db)
+	_, err = sqlc.InsertCourtCase(context.Background(), pgquery.InsertCourtCaseParams{
+		Cnj: courtCase.Cnj,
+		Plaintiff: courtCase.Plaintiff,
+		Defendant: courtCase.Defendant,
+		CourtOfOrigin: courtCase.CourtOfOrigin,
+		StartDate: pgtype.Timestamptz{
+			Time: courtCase.StartDate,
+			Valid: true,
+		},
+	})
+	if err != nil {
+		http.Error(w, "Failed to save on db", http.StatusBadRequest)
+		return
+	}
 }
 
 func main() {
@@ -38,8 +57,9 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to connect to db")
 	}
+	api := &Api{Db: conn}
 	defer conn.Close(context.Background())
 
-	http.HandleFunc("/register_court_case", RegisterCourtCase)
+	http.HandleFunc("/register_court_case", api.RegisterCourtCase)
 	http.ListenAndServe(":8081", nil)
 }
