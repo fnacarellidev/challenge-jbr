@@ -8,4 +8,4 @@ CREATE TABLE court_case (
 	court_of_origin TEXT NOT NULL,
 	start_date		TIMESTAMPTZ NOT NULL,
 	created_at		TIMESTAMPTZ DEFAULT NOW()
-);
+)
