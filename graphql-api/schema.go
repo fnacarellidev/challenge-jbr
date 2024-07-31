@@ -31,16 +31,17 @@ var courtCaseType = graphql.NewObject(graphql.ObjectConfig{
 })
 
 func FetchBackendCourtCase(p graphql.ResolveParams) (interface{}, error) {
-	r, err := http.Post("http://localhost:8081/fetch_court_case/123", "application/json", nil)
+	cnj, _ := p.Args["cnj"].(string)
+	endpoint := "http://localhost:8081/fetch_court_case/"+cnj
+	r, err := http.Post(endpoint, "application/json", nil)
 	if err != nil {
-		log.Println("failed", err)
+		log.Println("POST at", endpoint, "failed with reason", err)
 		return nil, nil
 	}
 
 	var courtCase types.CourtCase
 	err = json.NewDecoder(r.Body).Decode(&courtCase)
 	if err != nil {
-		log.Println("failed 2", err)
 		return nil, nil
 	}
 
@@ -58,6 +59,11 @@ var rootQuery = graphql.NewObject(graphql.ObjectConfig{
 	Fields: graphql.Fields{
 		"courtCase": &graphql.Field{
 			Type: courtCaseType,
+			Args: graphql.FieldConfigArgument{
+				"cnj": &graphql.ArgumentConfig{
+					Type: graphql.String,
+				},
+			},
 			Resolve: FetchBackendCourtCase,
 		},
 	},
