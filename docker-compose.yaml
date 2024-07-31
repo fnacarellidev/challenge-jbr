@@ -26,8 +26,8 @@ services:
 
   backend-api:
     build:
-      context: backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: backend/Dockerfile
     environment:
       DATABASE_URL: postgresql://postgres:pgpass@postgres:5432
     depends_on:

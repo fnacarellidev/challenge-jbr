@@ -6,21 +6,13 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/fnacarellidev/challenge-jbr/backend/.sqlcbuild/pgquery"
+	"github.com/fnacarellidev/challenge-jbr/types"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/julienschmidt/httprouter"
 )
-
-type CourtCase struct {
-	Cnj           string    `json:"cnj"`
-	Plaintiff     string    `json:"plaintiff"`
-	Defendant     string    `json:"defendant"`
-	CourtOfOrigin string    `json:"courtOfOrigin"`
-	StartDate     time.Time `json:"startDate"`
-}
 
 type Api struct {
 	Db *pgx.Conn
@@ -28,7 +20,7 @@ type Api struct {
 
 // todo think about case where the court has already been registered
 func (api *Api) RegisterCourtCase(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	var courtCase CourtCase
+	var courtCase types.CourtCase
 
 	err := json.NewDecoder(r.Body).Decode(&courtCase)
 	if err != nil {
@@ -63,7 +55,7 @@ func (api *Api) FetchCourtCase(w http.ResponseWriter, r *http.Request, ps httpro
 		return
 	}
 
-	jsonBytes, err := json.Marshal(CourtCase{
+	jsonBytes, err := json.Marshal(types.CourtCase{
 		Cnj: courtCase.Cnj,
 		Plaintiff: courtCase.Plaintiff,
 		Defendant: courtCase.Defendant,
