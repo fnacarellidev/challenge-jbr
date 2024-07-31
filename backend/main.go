@@ -11,6 +11,7 @@ import (
 	"github.com/fnacarellidev/challenge-jbr/backend/.sqlcbuild/pgquery"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/julienschmidt/httprouter"
 )
 
 type CourtCase struct {
@@ -26,7 +27,7 @@ type Api struct {
 }
 
 // todo think about case where the court has already been registered
-func (api *Api) RegisterCourtCase(w http.ResponseWriter, r *http.Request) {
+func (api *Api) RegisterCourtCase(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	var courtCase CourtCase
 
 	err := json.NewDecoder(r.Body).Decode(&courtCase)
@@ -60,6 +61,6 @@ func main() {
 	api := &Api{Db: conn}
 	defer conn.Close(context.Background())
 
-	http.HandleFunc("/register_court_case", api.RegisterCourtCase)
-	http.ListenAndServe(":8081", nil)
+	router.POST("/register_court_case", api.RegisterCourtCase)
+	http.ListenAndServe(":8081", router)
 }
