@@ -11,7 +11,7 @@ import (
 
 var courtCaseType = graphql.NewObject(graphql.ObjectConfig{
 	Name: "CourtCase",
-    Fields: graphql.Fields{
+	Fields: graphql.Fields{
         "cnj": &graphql.Field{
             Type: graphql.String,
         },
