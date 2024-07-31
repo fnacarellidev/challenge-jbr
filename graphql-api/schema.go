@@ -21,10 +21,10 @@ var courtCaseType = graphql.NewObject(graphql.ObjectConfig{
         "defendant": &graphql.Field{
             Type: graphql.String,
         },
-        "courtOfOrigin": &graphql.Field{
+        "court_of_origin": &graphql.Field{
             Type: graphql.String,
         },
-        "startDate": &graphql.Field{
+        "start_date": &graphql.Field{
             Type: graphql.DateTime,
         },
     },
@@ -49,15 +49,15 @@ func FetchBackendCourtCase(p graphql.ResolveParams) (interface{}, error) {
 		"cnj": courtCase.Cnj,
 		"plaintiff": courtCase.Plaintiff,
 		"defendant": courtCase.Defendant,
-		"courtOfOrigin": courtCase.CourtOfOrigin,
-		"startDate": courtCase.StartDate,
+		"court_of_origin": courtCase.CourtOfOrigin,
+		"start_date": courtCase.StartDate,
 	}, nil
 }
 
 var rootQuery = graphql.NewObject(graphql.ObjectConfig{
 	Name: "RootQuery",
 	Fields: graphql.Fields{
-		"courtCase": &graphql.Field{
+		"court_case": &graphql.Field{
 			Type: courtCaseType,
 			Args: graphql.FieldConfigArgument{
 				"cnj": &graphql.ArgumentConfig{
