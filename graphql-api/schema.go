@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 
-	"github.com/graphql-go/graphql"
 	"github.com/fnacarellidev/challenge-jbr/types"
+	"github.com/graphql-go/graphql"
 )
 
 var courtCaseType = graphql.NewObject(graphql.ObjectConfig{
@@ -32,7 +33,7 @@ var courtCaseType = graphql.NewObject(graphql.ObjectConfig{
 
 func FetchBackendCourtCase(p graphql.ResolveParams) (interface{}, error) {
 	cnj, _ := p.Args["cnj"].(string)
-	endpoint := "http://localhost:8081/fetch_court_case/"+cnj
+	endpoint := os.Getenv("BACKEND_API_URL")+"fetch_court_case/"+cnj
 	r, err := http.Get(endpoint)
 	if err != nil {
 		log.Println("GET at", endpoint, "failed with reason", err)

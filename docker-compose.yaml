@@ -39,3 +39,15 @@ services:
         condition: service_healthy
     ports:
       - "8081:8081"
+
+  graphql-api:
+    build:
+      context: .
+      dockerfile: graphql-api/Dockerfile
+    environment:
+      BACKEND_API_URL: http://backend-api:8081/
+    depends_on:
+      backend-api:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
