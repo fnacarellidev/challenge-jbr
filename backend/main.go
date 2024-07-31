@@ -53,6 +53,31 @@ func (api *Api) RegisterCourtCase(w http.ResponseWriter, r *http.Request, _ http
 	}
 }
 
+func (api *Api) FetchCourtCase(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	cnjLookup := ps.ByName("cnj")
+	sqlc := pgquery.New(api.Db)
+
+	courtCase, error := sqlc.GetCourtCase(context.Background(), cnjLookup)
+	if error != nil {
+		http.Error(w, "There's no such court case", http.StatusBadRequest)
+		return
+	}
+
+	jsonBytes, err := json.Marshal(CourtCase{
+		Cnj: courtCase.Cnj,
+		Plaintiff: courtCase.Plaintiff,
+		Defendant: courtCase.Defendant,
+		CourtOfOrigin: courtCase.CourtOfOrigin,
+		StartDate: courtCase.StartDate.Time,
+	})
+	if err != nil {
+		http.Error(w, "Internal error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(jsonBytes)
+}
+
 func main() {
 	conn, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {
@@ -61,6 +86,8 @@ func main() {
 	api := &Api{Db: conn}
 	defer conn.Close(context.Background())
 
+	router := httprouter.New()
 	router.POST("/register_court_case", api.RegisterCourtCase)
+	router.POST("/fetch_court_case/:cnj", api.FetchCourtCase)
 	http.ListenAndServe(":8081", router)
 }
