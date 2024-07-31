@@ -23,3 +23,15 @@ services:
       interval: 3s
     ports:
       - "5432:5432"
+
+  backend-api:
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql://postgres:pgpass@postgres:5432
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
