@@ -17,6 +17,7 @@ RUN --mount=type=cache,target=/go-cache go build -o app
 FROM cgr.dev/chainguard/wolfi-base:latest@sha256:3eff851ab805966c768d2a8107545a96218426cee1e5cc805865505edbe6ce92
 
 WORKDIR /app
+RUN apk add curl
 COPY --from=builder /build/backend/app .
 
 ENTRYPOINT ["./app"]

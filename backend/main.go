@@ -70,6 +70,10 @@ func (api *Api) FetchCourtCase(w http.ResponseWriter, r *http.Request, ps httpro
 	w.Write(jsonBytes)
 }
 
+func (api *Api) Healthcheck(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	w.Write([]byte("Healthy"))
+}
+
 func main() {
 	conn, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {
@@ -81,5 +85,6 @@ func main() {
 	router := httprouter.New()
 	router.POST("/register_court_case", api.RegisterCourtCase)
 	router.POST("/fetch_court_case/:cnj", api.FetchCourtCase)
+	router.GET("/healthcheck", api.Healthcheck)
 	http.ListenAndServe(":8081", router)
 }
