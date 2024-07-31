@@ -84,7 +84,7 @@ func main() {
 
 	router := httprouter.New()
 	router.POST("/register_court_case", api.RegisterCourtCase)
-	router.POST("/fetch_court_case/:cnj", api.FetchCourtCase)
+	router.GET("/fetch_court_case/:cnj", api.FetchCourtCase)
 	router.GET("/healthcheck", api.Healthcheck)
 	http.ListenAndServe(":8081", router)
 }
