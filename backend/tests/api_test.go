@@ -1,8 +1,10 @@
 package tests
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"io"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -181,6 +183,72 @@ func (suite *BackendApiTestSuite) TestFetchUpdatesOnChrisVersusJessica() {
 		assert.Equal(t, expectedUpdates[i], update.UpdateDetails, "Case update detail does not match")
 		assert.Equal(t, expectedDates[i], update.UpdateDate, "Case update date does not match")
 	}
+}
+
+func (suite *BackendApiTestSuite) TestFetchCourtCaseThatDoesntExist() {
+	t := suite.T()
+	router := httprouter.New()
+	expectedResponse := "404 not found\n"
+	endpoint := "/fetch_court_case/casethatdoesntexist"
+	router.GET("/fetch_court_case/:cnj", endpoints.FetchCourtCase)
+
+	req, _ := http.NewRequest("GET", endpoint, nil)
+	rr := httptest.NewRecorder()
+	router.ServeHTTP(rr, req)
+	bytes, _ := io.ReadAll(rr.Body)
+
+	assert.Equal(t, http.StatusNotFound, rr.Result().StatusCode, "Status was not 404.")
+	assert.Equal(t, expectedResponse, string(bytes), "Response body was not '404 not found'")
+}
+
+func (suite *BackendApiTestSuite) TestInsertCourtCaseThatExists() {
+	t := suite.T()
+	router := httprouter.New()
+	expectedResponse := "case already exists"
+	endpoint := "/register_court_case"
+	router.POST(endpoint, endpoints.RegisterCourtCase)
+
+	jsonBody, _ := json.Marshal(
+		types.CourtCase{
+			Cnj: "5001682-88.2024.8.13.0672",
+			Plaintiff: "John Doe",
+			Defendant: "Foo Bar",
+			StartDate: time.Now().Local(),
+			CourtOfOrigin: "FOO",
+		},
+	)
+	req, _ := http.NewRequest("POST", endpoint, bytes.NewBuffer(jsonBody))
+	rr := httptest.NewRecorder()
+	router.ServeHTTP(rr, req)
+	var errResponse types.ErrResponse
+	json.Unmarshal(rr.Body.Bytes(), &errResponse)
+
+	assert.Equal(t, http.StatusConflict, rr.Result().StatusCode, "Status does not match.")
+	assert.Equal(t, expectedResponse, errResponse.Error, "Err message does not match.")
+}
+
+func (suite *BackendApiTestSuite) TestInsertInvalidCourtCase() {
+	t := suite.T()
+	router := httprouter.New()
+	expectedResponse := "invalid request payload"
+	endpoint := "/register_court_case"
+	router.POST(endpoint, endpoints.RegisterCourtCase)
+
+	jsonBody, _ := json.Marshal(
+		struct {
+			Cnj int `json:"cnj"`
+		}{
+			Cnj: 1,
+		},
+	)
+	req, _ := http.NewRequest("POST", endpoint, bytes.NewBuffer(jsonBody))
+	rr := httptest.NewRecorder()
+	router.ServeHTTP(rr, req)
+	var errResponse types.ErrResponse
+	json.Unmarshal(rr.Body.Bytes(), &errResponse)
+
+	assert.Equal(t, http.StatusBadRequest, rr.Result().StatusCode, "Status does not match.")
+	assert.Equal(t, expectedResponse, errResponse.Error, "Err message does not match.")
 }
 
 func TestBackendApiSuite(t *testing.T) {

@@ -24,7 +24,12 @@ func RegisterCourtCase(w http.ResponseWriter, r *http.Request, _ httprouter.Para
 	var courtCase types.CourtCase
 	err = json.NewDecoder(r.Body).Decode(&courtCase)
 	if err != nil {
-		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		errorResponse := types.ErrResponse{
+			Error: "invalid request payload",
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		bytes, _ := json.Marshal(errorResponse)
+		w.Write(bytes)
 		return
 	}
 
@@ -40,8 +45,12 @@ func RegisterCourtCase(w http.ResponseWriter, r *http.Request, _ httprouter.Para
 		},
 	})
 	if err != nil {
-		http.Error(w, "Failed to save on db", http.StatusBadRequest)
-		return
+		errorResponse := types.ErrResponse{
+			Error: "case already exists",
+		}
+		w.WriteHeader(http.StatusConflict)
+		bytes, _ := json.Marshal(errorResponse)
+		w.Write(bytes)
 	}
 }
 
