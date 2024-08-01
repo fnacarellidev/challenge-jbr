@@ -27,9 +27,17 @@ func RegisterCourtCase(w http.ResponseWriter, r *http.Request, _ httprouter.Para
 		errorResponse := types.ErrResponse{
 			Error: "invalid request payload",
 		}
-		w.WriteHeader(http.StatusBadRequest)
 		bytes, _ := json.Marshal(errorResponse)
-		w.Write(bytes)
+		http.Error(w, string(bytes), http.StatusBadRequest)
+		return
+	}
+
+	if err := courtCase.Validate(); err != nil {
+		errorResponse := types.ErrResponse{
+			Error: err.Error(),
+		}
+		bytes, _ := json.Marshal(errorResponse)
+		http.Error(w, string(bytes), http.StatusBadRequest)
 		return
 	}
 
@@ -48,9 +56,8 @@ func RegisterCourtCase(w http.ResponseWriter, r *http.Request, _ httprouter.Para
 		errorResponse := types.ErrResponse{
 			Error: "case already exists",
 		}
-		w.WriteHeader(http.StatusConflict)
 		bytes, _ := json.Marshal(errorResponse)
-		w.Write(bytes)
+		http.Error(w, string(bytes), http.StatusConflict)
 	}
 }
 

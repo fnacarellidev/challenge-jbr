@@ -25,22 +25,26 @@ func FetchCourtCase(w http.ResponseWriter, r *http.Request, ps httprouter.Params
 	sqlc := pgquery.New(conn)
 	courtCase, error := sqlc.GetCourtCase(context.Background(), cnjLookup)
 	if error != nil {
-		http.Error(w, "There's no such court case", http.StatusBadRequest)
+		var errorResponse types.ErrResponse
+		errorResponse.Error = "internal server error"
+		statusCode := http.StatusInternalServerError
+
+		if error == pgx.ErrNoRows {
+			statusCode = http.StatusNotFound
+			errorResponse.Error = "no case with cnj "+cnjLookup
+		}
+		bytes, _ := json.Marshal(errorResponse)
+		http.Error(w, string(bytes), statusCode)
 		return
 	}
 
-	jsonBytes, err := json.Marshal(types.CourtCase{
+	jsonBytes, _ := json.Marshal(types.CourtCase{
 		Cnj: courtCase.Cnj,
 		Plaintiff: courtCase.Plaintiff,
 		Defendant: courtCase.Defendant,
 		CourtOfOrigin: courtCase.CourtOfOrigin,
 		StartDate: courtCase.StartDate.Time,
 	})
-	if err != nil {
-		http.Error(w, "Internal error", http.StatusInternalServerError)
-		return
-	}
-
 	w.Write(jsonBytes)
 }
 

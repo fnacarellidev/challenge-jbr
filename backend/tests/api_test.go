@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"io"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -188,17 +187,18 @@ func (suite *BackendApiTestSuite) TestFetchUpdatesOnChrisVersusJessica() {
 func (suite *BackendApiTestSuite) TestFetchCourtCaseThatDoesntExist() {
 	t := suite.T()
 	router := httprouter.New()
-	expectedResponse := "404 not found\n"
+	expectedResponse := "no case with cnj casethatdoesntexist"
 	endpoint := "/fetch_court_case/casethatdoesntexist"
 	router.GET("/fetch_court_case/:cnj", endpoints.FetchCourtCase)
 
 	req, _ := http.NewRequest("GET", endpoint, nil)
 	rr := httptest.NewRecorder()
 	router.ServeHTTP(rr, req)
-	bytes, _ := io.ReadAll(rr.Body)
+	var errResponse types.ErrResponse
+	json.Unmarshal(rr.Body.Bytes(), &errResponse)
 
 	assert.Equal(t, http.StatusNotFound, rr.Result().StatusCode, "Status was not 404.")
-	assert.Equal(t, expectedResponse, string(bytes), "Response body was not '404 not found'")
+	assert.Equal(t, expectedResponse, errResponse.Error, "Response body was not '404 not found'")
 }
 
 func (suite *BackendApiTestSuite) TestInsertCourtCaseThatExists() {
@@ -239,6 +239,32 @@ func (suite *BackendApiTestSuite) TestInsertInvalidCourtCase() {
 			Cnj int `json:"cnj"`
 		}{
 			Cnj: 1,
+		},
+	)
+	req, _ := http.NewRequest("POST", endpoint, bytes.NewBuffer(jsonBody))
+	rr := httptest.NewRecorder()
+	router.ServeHTTP(rr, req)
+	var errResponse types.ErrResponse
+	json.Unmarshal(rr.Body.Bytes(), &errResponse)
+
+	assert.Equal(t, http.StatusBadRequest, rr.Result().StatusCode, "Status does not match.")
+	assert.Equal(t, expectedResponse, errResponse.Error, "Err message does not match.")
+}
+
+func (suite *BackendApiTestSuite) TestInsertCourtCaseEmptyCnj() {
+	t := suite.T()
+	router := httprouter.New()
+	expectedResponse := "cnj field cannot be empty"
+	endpoint := "/register_court_case"
+	router.POST(endpoint, endpoints.RegisterCourtCase)
+
+	jsonBody, _ := json.Marshal(
+		types.CourtCase{
+			Cnj: "",
+			Plaintiff: "John Doe",
+			Defendant: "Foo Bar",
+			StartDate: time.Now().UTC(),
+			CourtOfOrigin: "FOO",
 		},
 	)
 	req, _ := http.NewRequest("POST", endpoint, bytes.NewBuffer(jsonBody))
