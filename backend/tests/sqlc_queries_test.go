@@ -86,6 +86,6 @@ func (suite *BackendUnitTestSuite) TestInsertCourtCase() {
 	assert.Equal(t, courtCase.StartDate, startDate)
 }
 
-func TestBackendApiSuite(t *testing.T) {
+func TestBackendUnitTestSuite(t *testing.T) {
     suite.Run(t, new(BackendUnitTestSuite))
 }
