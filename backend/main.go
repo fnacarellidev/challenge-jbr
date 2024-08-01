@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/fnacarellidev/challenge-jbr/backend/.sqlcbuild/pgquery"
 	"github.com/fnacarellidev/challenge-jbr/types"
@@ -17,11 +16,6 @@ import (
 
 type Api struct {
 	Db *pgx.Conn
-}
-
-type CaseUpdate struct {
-	UpdateDate    time.Time `json:"update_date"`
-	UpdateDetails string    `json:"update_details"`
 }
 
 // todo think about case where the court has already been registered
@@ -86,9 +80,9 @@ func (api *Api) FetchUpdatesFromCase(w http.ResponseWriter, r *http.Request, ps 
 		return
 	}
 
-	var CaseUpdates []CaseUpdate
+	var CaseUpdates []types.CaseUpdate
 	for _, row := range(rows) {
-		CaseUpdate := CaseUpdate{
+		CaseUpdate := types.CaseUpdate{
 			UpdateDate: row.UpdateDate.Time,
 			UpdateDetails: row.UpdateDetails,
 		}

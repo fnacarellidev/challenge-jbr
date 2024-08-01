@@ -9,3 +9,8 @@ type CourtCase struct {
 	CourtOfOrigin string    `json:"courtOfOrigin"`
 	StartDate     time.Time `json:"startDate"`
 }
+
+type CaseUpdate struct {
+	UpdateDate    time.Time `json:"update_date"`
+	UpdateDetails string    `json:"update_details"`
+}
