@@ -14,3 +14,7 @@ type CaseUpdate struct {
 	UpdateDate    time.Time `json:"update_date"`
 	UpdateDetails string    `json:"update_details"`
 }
+
+type ErrResponse struct {
+	Error string `json:"error"`
+}
