@@ -10,6 +10,18 @@ import (
 	"github.com/graphql-go/graphql"
 )
 
+var caseUpdateType = graphql.NewObject(graphql.ObjectConfig{
+	Name: "CaseUpdate",
+	Fields: graphql.Fields{
+		"update_date": &graphql.Field{
+			Type: graphql.DateTime,
+		},
+		"update_details": &graphql.Field{
+			Type: graphql.String,
+		},
+	},
+})
+
 var courtCaseType = graphql.NewObject(graphql.ObjectConfig{
 	Name: "CourtCase",
 	Fields: graphql.Fields{
@@ -55,6 +67,25 @@ func FetchBackendCourtCase(p graphql.ResolveParams) (interface{}, error) {
 	}, nil
 }
 
+func FetchBackendCaseUpdate(p graphql.ResolveParams) (interface{}, error) {
+	cnj, _ := p.Args["cnj"].(string)
+	endpoint := os.Getenv("BACKEND_API_URL")+"fetch_updates_from_case/"+cnj
+	r, err := http.Get(endpoint)
+	if err != nil {
+		log.Println("GET at", endpoint, "failed with reason", err)
+		return nil, nil
+	}
+
+	var caseUpdates []types.CaseUpdate
+	err = json.NewDecoder(r.Body).Decode(&caseUpdates)
+	if err != nil {
+		log.Println("error:", err)
+		return nil, nil
+	}
+
+	return caseUpdates, nil
+}
+
 var rootQuery = graphql.NewObject(graphql.ObjectConfig{
 	Name: "RootQuery",
 	Fields: graphql.Fields{
@@ -66,6 +97,15 @@ var rootQuery = graphql.NewObject(graphql.ObjectConfig{
 				},
 			},
 			Resolve: FetchBackendCourtCase,
+		},
+		"case_updates": &graphql.Field{
+			Type: graphql.NewList(caseUpdateType),
+			Args: graphql.FieldConfigArgument{
+				"cnj": &graphql.ArgumentConfig{
+					Type: graphql.String,
+				},
+			},
+			Resolve: FetchBackendCaseUpdate,
 		},
 	},
 })
