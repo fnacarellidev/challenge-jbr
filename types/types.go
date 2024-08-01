@@ -1,6 +1,9 @@
 package types
 
-import "time"
+import (
+	"errors"
+	"time"
+)
 
 type CourtCase struct {
 	Cnj           string    `json:"cnj"`
@@ -17,4 +20,25 @@ type CaseUpdate struct {
 
 type ErrResponse struct {
 	Error string `json:"error"`
+}
+
+func (c *CourtCase) Validate() error {
+	if c.Cnj == "" {
+		return errors.New("cnj field cannot be empty")
+	}
+	if c.Plaintiff == "" {
+		return errors.New("plaintiff field cannot be empty")
+	}
+	if c.Defendant == "" {
+		return errors.New("defendant field cannot be empty")
+	}
+	if c.CourtOfOrigin == "" {
+		return errors.New("court_of_origin field cannot be empty")
+	}
+	if c.StartDate.IsZero() {
+		return errors.New("start_date field must be a valid date")
+	}
+	return nil
+
+
 }
