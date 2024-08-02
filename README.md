@@ -1,5 +1,9 @@
 # Desafio Consulta Processual
 
+## Modelo De Dados
+
+![database schema](https://github.com/fnacarellidev/challenge-jbr/blob/main/assets/schema.png)
+
 ## Backend API
 
 ### Tecnologias Utilizadas Na Construção Do Backend
