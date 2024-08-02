@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	schemainit "github.com/fnacarellidev/challenge-jbr/graphql-api/schema_init"
 	"github.com/fnacarellidev/challenge-jbr/types"
@@ -40,9 +41,32 @@ func FetchBackendCourtCase(p graphql.ResolveParams) (interface{}, error) {
 	}, nil
 }
 
+func AddCourtCase(p graphql.ResolveParams) (interface{}, error) {
+	courtCase := types.CourtCase{
+		Cnj: p.Args["cnj"].(string),
+		Plaintiff: p.Args["plaintiff"].(string),
+		Defendant: p.Args["defendant"].(string),
+		CourtOfOrigin: p.Args["court_of_origin"].(string),
+		StartDate: p.Args["start_date"].(time.Time),
+	}
+
+	genericUpdates := p.Args["updates"].([]interface{})
+	for _, genericUpdate := range genericUpdates {
+		updateMap := genericUpdate.(map[string]interface{})
+		updateDate := updateMap["update_date"].(time.Time)
+		updateDetails := updateMap["update_details"].(string)
+		courtCase.Updates = append(courtCase.Updates, types.CaseUpdate{
+			UpdateDate:    updateDate,
+			UpdateDetails: updateDetails,
+		})
+	}
+
+	return nil, nil
+}
+
 func main() {
     h := handler.New(&handler.Config{
-        Schema: schemainit.SchemaInit(FetchBackendCourtCase),
+        Schema: schemainit.SchemaInit(FetchBackendCourtCase, AddCourtCase),
         Pretty: true,
     })
 

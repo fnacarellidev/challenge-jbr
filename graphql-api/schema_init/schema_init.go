@@ -2,6 +2,18 @@ package schemainit
 
 import "github.com/graphql-go/graphql"
 
+var caseUpdateInputType = graphql.NewInputObject(graphql.InputObjectConfig{
+	Name: "CaseUpdateInput",
+	Fields: graphql.InputObjectConfigFieldMap{
+		"update_date": &graphql.InputObjectFieldConfig{
+			Type: graphql.DateTime,
+		},
+		"update_details": &graphql.InputObjectFieldConfig{
+			Type: graphql.String,
+		},
+	},
+})
+
 var caseUpdateType = graphql.NewObject(graphql.ObjectConfig{
 	Name: "CaseUpdate",
 	Fields: graphql.Fields{
@@ -39,7 +51,8 @@ var courtCaseType = graphql.NewObject(graphql.ObjectConfig{
 })
 
 func SchemaInit(
-	resolver func(p graphql.ResolveParams) (interface{}, error),
+	resolverFetch func(p graphql.ResolveParams) (interface{}, error),
+	resolverAdd func(p graphql.ResolveParams) (interface{}, error),
 ) (*graphql.Schema) {
 	rootQuery := graphql.NewObject(graphql.ObjectConfig{
 		Name: "RootQuery",
@@ -51,13 +64,44 @@ func SchemaInit(
 						Type: graphql.String,
 					},
 				},
-				Resolve: resolver,
+				Resolve: resolverFetch,
+			},
+		},
+	})
+
+	rootMutation := graphql.NewObject(graphql.ObjectConfig{
+		Name: "RootMutation",
+		Fields: graphql.Fields{
+			"new_court_case": &graphql.Field{
+				Type: courtCaseType,
+				Args: graphql.FieldConfigArgument{
+					"cnj": &graphql.ArgumentConfig{
+						Type: graphql.NewNonNull(graphql.String),
+					},
+					"plaintiff": &graphql.ArgumentConfig{
+						Type: graphql.NewNonNull(graphql.String),
+					},
+					"defendant": &graphql.ArgumentConfig{
+						Type: graphql.NewNonNull(graphql.String),
+					},
+					"court_of_origin": &graphql.ArgumentConfig{
+						Type: graphql.NewNonNull(graphql.String),
+					},
+					"start_date": &graphql.ArgumentConfig{
+						Type: graphql.NewNonNull(graphql.DateTime),
+					},
+					"updates": &graphql.ArgumentConfig{
+						Type: graphql.NewList(caseUpdateInputType),
+					},
+				},
+				Resolve: resolverAdd,
 			},
 		},
 	})
 
 	var schema, _ = graphql.NewSchema(graphql.SchemaConfig{
 		Query: rootQuery,
+		Mutation: rootMutation,
 	})
 
 	return &schema
