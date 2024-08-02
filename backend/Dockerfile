@@ -4,7 +4,7 @@ ENV CGO_ENABLED=0
 
 WORKDIR /build
 
-RUN go install github.com/sqlc-dev/sqlc/cmd/sqlc@v1.26.0
+RUN go install github.com/sqlc-dev/sqlc/cmd/sqlc@v1.25.0
 
 RUN go env -w GOCACHE=/go-cache
 
