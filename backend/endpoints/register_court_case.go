@@ -1,13 +1,14 @@
 package endpoints
 
 import (
-	"os"
-	"log"
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
+	"os"
 
 	"github.com/fnacarellidev/challenge-jbr/backend/.sqlcbuild/pgquery"
+	"github.com/fnacarellidev/challenge-jbr/backend/endpoints/utils"
 	"github.com/fnacarellidev/challenge-jbr/types"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -16,28 +17,20 @@ import (
 
 func RegisterCourtCase(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	conn, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
+	defer conn.Close(context.Background())
 	if err != nil {
 		log.Fatal("Failed to connect to db")
 	}
-	defer conn.Close(context.Background())
 
 	var courtCase types.CourtCase
 	err = json.NewDecoder(r.Body).Decode(&courtCase)
 	if err != nil {
-		errorResponse := types.ErrResponse{
-			Error: "invalid request payload",
-		}
-		bytes, _ := json.Marshal(errorResponse)
-		http.Error(w, string(bytes), http.StatusBadRequest)
+		utils.SendError(w, "invalid request payload", http.StatusBadRequest)
 		return
 	}
 
 	if err := courtCase.Validate(); err != nil {
-		errorResponse := types.ErrResponse{
-			Error: err.Error(),
-		}
-		bytes, _ := json.Marshal(errorResponse)
-		http.Error(w, string(bytes), http.StatusBadRequest)
+		utils.SendError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -53,11 +46,7 @@ func RegisterCourtCase(w http.ResponseWriter, r *http.Request, _ httprouter.Para
 		},
 	})
 	if err != nil {
-		errorResponse := types.ErrResponse{
-			Error: "case already exists",
-		}
-		bytes, _ := json.Marshal(errorResponse)
-		http.Error(w, string(bytes), http.StatusConflict)
+		utils.SendError(w, "case already exists", http.StatusConflict)
 	}
 }
 

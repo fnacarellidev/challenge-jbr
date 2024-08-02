@@ -1,13 +1,14 @@
 package endpoints
 
 import (
-	"os"
-	"log"
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
+	"os"
 
 	"github.com/fnacarellidev/challenge-jbr/backend/.sqlcbuild/pgquery"
+	"github.com/fnacarellidev/challenge-jbr/backend/endpoints/utils"
 	"github.com/fnacarellidev/challenge-jbr/types"
 	"github.com/jackc/pgx/v5"
 	"github.com/julienschmidt/httprouter"
@@ -25,16 +26,11 @@ func FetchCourtCase(w http.ResponseWriter, r *http.Request, ps httprouter.Params
 	sqlc := pgquery.New(conn)
 	courtCase, error := sqlc.GetCourtCase(context.Background(), cnjLookup)
 	if error != nil {
-		var errorResponse types.ErrResponse
-		errorResponse.Error = "internal server error"
-		statusCode := http.StatusInternalServerError
-
 		if error == pgx.ErrNoRows {
-			statusCode = http.StatusNotFound
-			errorResponse.Error = "no case with cnj "+cnjLookup
+			utils.SendError(w, "no case with cnj "+cnjLookup, http.StatusNotFound)
+		} else {
+			utils.SendError(w, "internal server error", http.StatusInternalServerError)
 		}
-		bytes, _ := json.Marshal(errorResponse)
-		http.Error(w, string(bytes), statusCode)
 		return
 	}
 
