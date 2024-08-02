@@ -10,11 +10,10 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
 
-	"github.com/fnacarellidev/challenge-jbr/backend/endpoints"
 	"github.com/fnacarellidev/challenge-jbr/testutil"
 	"github.com/fnacarellidev/challenge-jbr/types"
-	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/handler"
 	"github.com/julienschmidt/httprouter"
 	"github.com/stretchr/testify/assert"
@@ -33,92 +32,8 @@ type GraphQLApiTestSuite struct {
 	suite.Suite
 	pgContainer *types.PostgresContainer
 	ctx context.Context
+	router *httprouter.Router
 }
-
-var caseUpdateType = graphql.NewObject(graphql.ObjectConfig{
-	Name: "CaseUpdate",
-	Fields: graphql.Fields{
-		"update_date": &graphql.Field{
-			Type: graphql.DateTime,
-		},
-		"update_details": &graphql.Field{
-			Type: graphql.String,
-		},
-	},
-})
-
-var courtCaseType = graphql.NewObject(graphql.ObjectConfig{
-	Name: "CourtCase",
-	Fields: graphql.Fields{
-        "cnj": &graphql.Field{
-            Type: graphql.String,
-        },
-        "plaintiff": &graphql.Field{
-            Type: graphql.String,
-        },
-        "defendant": &graphql.Field{
-            Type: graphql.String,
-        },
-        "court_of_origin": &graphql.Field{
-            Type: graphql.String,
-        },
-        "start_date": &graphql.Field{
-            Type: graphql.DateTime,
-        },
-		"updates": &graphql.Field{
-			Type: graphql.NewList(caseUpdateType),
-		},
-    },
-})
-
-func FetchBackendCourtCase(p graphql.ResolveParams) (interface{}, error) {
-	cnj, _ := p.Args["cnj"].(string)
-	router := httprouter.New()
-	router.GET("/fetch_court_case/:cnj", endpoints.FetchCourtCase)
-	endpoint := os.Getenv("BACKEND_API_URL")+"fetch_court_case/"+cnj
-	req, err := http.NewRequest("GET", endpoint, nil)
-	if err != nil {
-		log.Println("ERROR", err)
-	}
-
-	var courtCase types.CourtCase
-	rr := httptest.NewRecorder()
-	router.ServeHTTP(rr, req)
-	bytes, _ := io.ReadAll(rr.Body)
-	err = json.Unmarshal(bytes, &courtCase)
-	if err != nil {
-		log.Println("failed unmarshal")
-	}
-
-	return map[string]interface{}{
-		"cnj": courtCase.Cnj,
-		"plaintiff": courtCase.Plaintiff,
-		"defendant": courtCase.Defendant,
-		"court_of_origin": courtCase.CourtOfOrigin,
-		"start_date": courtCase.StartDate,
-		"updates": courtCase.Updates,
-	}, nil
-}
-
-
-var rootQuery = graphql.NewObject(graphql.ObjectConfig{
-	Name: "RootQuery",
-	Fields: graphql.Fields{
-		"court_case": &graphql.Field{
-			Type: courtCaseType,
-			Args: graphql.FieldConfigArgument{
-				"cnj": &graphql.ArgumentConfig{
-					Type: graphql.String,
-				},
-			},
-			Resolve: FetchBackendCourtCase,
-		},
-	},
-})
-
-var schema, _ = graphql.NewSchema(graphql.SchemaConfig{
-    Query: rootQuery,
-})
 
 func (suite *GraphQLApiTestSuite) SetupSuite() {
 	suite.ctx = context.Background()
@@ -128,8 +43,13 @@ func (suite *GraphQLApiTestSuite) SetupSuite() {
 	}
 
 	suite.pgContainer = pgContainer
+	suite.router = httprouter.New()
+	h := handler.New(&handler.Config{
+		Schema: &schema,
+		Pretty: true,
+	})
+	suite.router.Handler("POST", "/graphql", h)
 	os.Setenv("DATABASE_URL", suite.pgContainer.ConnectionString)
-	os.Setenv("BACKEND_API_URL", "/")
 }
 
 func (suite *GraphQLApiTestSuite) TearDownTestSuite() {
@@ -138,16 +58,22 @@ func (suite *GraphQLApiTestSuite) TearDownTestSuite() {
 	}
 }
 
-func (suite *GraphQLApiTestSuite) TestFetchCourtCaseAliceBob() {
+func (suite *GraphQLApiTestSuite) TestFetchCourtCaseAliceBobAllInfo() {
 	t := suite.T()
-	router := httprouter.New()
-	router.GET("/fetch_court_case/:cnj", endpoints.FetchCourtCase)
-
-	h := handler.New(&handler.Config{
-		Schema: &schema,
-		Pretty: true,
-	})
-	router.Handler("POST", "/graphql", h)
+	expectedCnj := "5001682-88.2024.8.13.0672"
+	expectedPlaintiff := "Alice Johnson"
+	expectedDefendant := "Bob Smith"
+	courtOfOrigin := "TJSP"
+	expectedUpdates := []string{
+		"Defendant requested a delay for response.",
+		"Plaintiff submitted additional evidence.",
+		"Initial hearing scheduled for August 15, 2024.",
+	}
+	expectedUpdatesDates := []time.Time{
+		time.Date(2024, 8, 2, 6, 0, 0, 0, time.Local),
+		time.Date(2024, 8, 1, 11, 30, 0, 0, time.Local),
+		time.Date(2024, 7, 31, 7, 0, 0, 0, time.Local),
+	}
 	query := ` 
 	{
 		"query": "query($cnj: String!) { court_case(cnj: $cnj) { cnj plaintiff defendant court_of_origin start_date updates { update_date update_details } } }",
@@ -163,7 +89,7 @@ func (suite *GraphQLApiTestSuite) TestFetchCourtCaseAliceBob() {
 	}
 
 	rr := httptest.NewRecorder()
-	router.ServeHTTP(rr, req)
+	suite.router.ServeHTTP(rr, req)
 	bytes, err := io.ReadAll(rr.Body)
 	if err != nil {
 		log.Println("failed to read bytes", err)
@@ -176,7 +102,16 @@ func (suite *GraphQLApiTestSuite) TestFetchCourtCaseAliceBob() {
 	}
 
 	courtCase := graphQLResponse.Data.CourtCase
-	assert.Equal(t, "Alice Johnson", courtCase.Plaintiff, "Plaintiff name does not match")
+	assert.Equal(t, expectedCnj, courtCase.Cnj, "cnj does not match")
+	assert.Equal(t, expectedPlaintiff, courtCase.Plaintiff, "plaintiff does not match")
+	assert.Equal(t, expectedDefendant, courtCase.Defendant, "defendant does not match")
+	assert.Equal(t, courtOfOrigin, courtCase.CourtOfOrigin, "court of origin does not match")
+	assert.Equal(t, expectedUpdates[1], courtCase.Updates[1].UpdateDetails, "Second update does not match")
+	assert.Equal(t, expectedUpdates[2], courtCase.Updates[2].UpdateDetails, "Third update does not match")
+	assert.Equal(t, expectedUpdates[0], courtCase.Updates[0].UpdateDetails, "first update does not match")
+	assert.Equal(t, expectedUpdatesDates[0], courtCase.Updates[0].UpdateDate, "First update date does not match")
+	assert.Equal(t, expectedUpdatesDates[1], courtCase.Updates[1].UpdateDate, "Second update date does not match")
+	assert.Equal(t, expectedUpdatesDates[2], courtCase.Updates[2].UpdateDate, "Third update date does not match")
 }
 
 func TestGraphQLApiSuite(t *testing.T) {
