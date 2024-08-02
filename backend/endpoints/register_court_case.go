@@ -40,7 +40,7 @@ func RegisterCourtCase(w http.ResponseWriter, r *http.Request, _ httprouter.Para
 		Plaintiff: courtCase.Plaintiff,
 		Defendant: courtCase.Defendant,
 		CourtOfOrigin: courtCase.CourtOfOrigin,
-		StartDate: pgtype.Timestamptz{
+		StartDate: pgtype.Date{
 			Time: courtCase.StartDate,
 			Valid: true,
 		},

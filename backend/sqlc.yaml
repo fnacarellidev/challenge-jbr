@@ -2,7 +2,7 @@ version: "2"
 sql:
   - engine: postgresql
     queries: sqlc/query.sql
-    schema: sqlc/schema.sql
+    schema: ../postgres/01_schema.sql
     gen:
       go:
         out: .sqlcbuild/pgquery

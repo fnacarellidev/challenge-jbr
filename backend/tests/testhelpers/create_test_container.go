@@ -2,6 +2,7 @@ package testhelpers
 
 import (
 	"context"
+	"path/filepath"
 	"time"
 
 	"github.com/testcontainers/testcontainers-go"
@@ -17,7 +18,8 @@ type PostgresContainer struct {
 func CreatePostgresContainer(ctx context.Context) (*PostgresContainer, error) {
 	pgContainer, err := postgres.RunContainer(ctx,
 		testcontainers.WithImage("postgres:15.3-alpine"),
-		postgres.WithInitScripts("testdata/init-db.sql"),
+		postgres.WithInitScripts(filepath.Join("..", "..", "postgres", "01_schema.sql")),
+		postgres.WithInitScripts(filepath.Join("..", "..", "postgres", "02_mock-data.sql")),
 		postgres.WithDatabase("test-db"),
 		postgres.WithUsername("postgres"),
 		postgres.WithPassword("postgres"),

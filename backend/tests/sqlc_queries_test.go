@@ -64,7 +64,7 @@ func (suite *BackendUnitTestSuite) TestInsertCourtCase() {
 	plaintiff := "John Doe"
 	defendant := "Foo Bar"
 	courtOfOrigin := "TJNY"
-	startDate := pgtype.Timestamptz{
+	startDate := pgtype.Date{
 		Time: time.Date(2024, 8, 1, 0, 0, 0, 0, time.UTC),
 		Valid: true,
 	}
