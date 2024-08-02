@@ -20,6 +20,9 @@ func FetchBackendCourtCase(p graphql.ResolveParams) (interface{}, error) {
 		log.Println("GET at", endpoint, "failed with reason", err)
 		return nil, nil
 	}
+	if r.StatusCode != http.StatusOK {
+		return nil, nil
+	}
 
 	var courtCase types.CourtCase
 	err = json.NewDecoder(r.Body).Decode(&courtCase)
