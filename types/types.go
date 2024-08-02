@@ -3,6 +3,8 @@ package types
 import (
 	"errors"
 	"time"
+
+	"github.com/testcontainers/testcontainers-go/modules/postgres"
 )
 
 type CourtCase struct {
@@ -17,6 +19,11 @@ type CourtCase struct {
 type CaseUpdate struct {
 	UpdateDate    time.Time `json:"update_date"`
 	UpdateDetails string    `json:"update_details"`
+}
+
+type PostgresContainer struct {
+	*postgres.PostgresContainer
+	ConnectionString string
 }
 
 type ErrResponse struct {

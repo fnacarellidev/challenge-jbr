@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/fnacarellidev/challenge-jbr/backend/endpoints"
-	"github.com/fnacarellidev/challenge-jbr/backend/tests/testhelpers"
+	"github.com/fnacarellidev/challenge-jbr/testutil"
 	"github.com/fnacarellidev/challenge-jbr/types"
 	"github.com/julienschmidt/httprouter"
 	"github.com/stretchr/testify/assert"
@@ -21,13 +21,13 @@ import (
 
 type BackendApiTestSuite struct {
 	suite.Suite
-	pgContainer *testhelpers.PostgresContainer
+	pgContainer *types.PostgresContainer
 	ctx context.Context
 }
 
 func (suite *BackendApiTestSuite) SetupSuite() {
 	suite.ctx = context.Background()
-	pgContainer, err := testhelpers.CreatePostgresContainer(suite.ctx)
+	pgContainer, err := testutil.CreatePostgresContainer(suite.ctx)
 	if err != nil {
 		log.Fatal(err)
 	}

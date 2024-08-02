@@ -7,7 +7,8 @@ import (
 	"time"
 
 	"github.com/fnacarellidev/challenge-jbr/backend/.sqlcbuild/pgquery"
-	"github.com/fnacarellidev/challenge-jbr/backend/tests/testhelpers"
+	"github.com/fnacarellidev/challenge-jbr/testutil"
+	"github.com/fnacarellidev/challenge-jbr/types"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
@@ -17,7 +18,7 @@ import (
 
 type BackendUnitTestSuite struct {
     suite.Suite
-	pgContainer *testhelpers.PostgresContainer
+	pgContainer *types.PostgresContainer
 	sqlcQueries *pgquery.Queries
 	ctx context.Context
 	conn *pgx.Conn
@@ -25,7 +26,7 @@ type BackendUnitTestSuite struct {
 
 func (suite *BackendUnitTestSuite) SetupSuite() {
 	suite.ctx = context.Background()
-	pgContainer, err := testhelpers.CreatePostgresContainer(suite.ctx)
+	pgContainer, err := testutil.CreatePostgresContainer(suite.ctx)
 	if err != nil {
 		log.Fatal(err)
 	}

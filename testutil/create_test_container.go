@@ -1,21 +1,17 @@
-package testhelpers
+package testutil
 
 import (
 	"context"
 	"path/filepath"
 	"time"
 
+	"github.com/fnacarellidev/challenge-jbr/types"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
-type PostgresContainer struct {
-	*postgres.PostgresContainer
-	ConnectionString string
-}
-
-func CreatePostgresContainer(ctx context.Context) (*PostgresContainer, error) {
+func CreatePostgresContainer(ctx context.Context) (*types.PostgresContainer, error) {
 	pgContainer, err := postgres.RunContainer(ctx,
 		testcontainers.WithImage("postgres:15.3-alpine"),
 		postgres.WithInitScripts(filepath.Join("..", "..", "postgres", "01_schema.sql")),
@@ -35,7 +31,7 @@ func CreatePostgresContainer(ctx context.Context) (*PostgresContainer, error) {
 		return nil, err
 	}
 
-	return &PostgresContainer{
+	return &types.PostgresContainer{
 		PostgresContainer: pgContainer,
 		ConnectionString:  connStr,
 	}, nil
