@@ -1,15 +1,45 @@
 package main
 
 import (
-    "log"
-    "net/http"
+	"encoding/json"
+	"log"
+	"net/http"
+	"os"
 
-    "github.com/graphql-go/handler"
+	schemainit "github.com/fnacarellidev/challenge-jbr/graphql-api/schema_init"
+	"github.com/fnacarellidev/challenge-jbr/types"
+	"github.com/graphql-go/graphql"
+	"github.com/graphql-go/handler"
 )
+
+func FetchBackendCourtCase(p graphql.ResolveParams) (interface{}, error) {
+	cnj, _ := p.Args["cnj"].(string)
+	endpoint := os.Getenv("BACKEND_API_URL")+"fetch_court_case/"+cnj
+	r, err := http.Get(endpoint)
+	if err != nil {
+		log.Println("GET at", endpoint, "failed with reason", err)
+		return nil, nil
+	}
+
+	var courtCase types.CourtCase
+	err = json.NewDecoder(r.Body).Decode(&courtCase)
+	if err != nil {
+		return nil, nil
+	}
+
+	return map[string]interface{}{
+		"cnj": courtCase.Cnj,
+		"plaintiff": courtCase.Plaintiff,
+		"defendant": courtCase.Defendant,
+		"court_of_origin": courtCase.CourtOfOrigin,
+		"start_date": courtCase.StartDate,
+		"updates": courtCase.Updates,
+	}, nil
+}
 
 func main() {
     h := handler.New(&handler.Config{
-        Schema: &schema,
+        Schema: schemainit.SchemaInit(FetchBackendCourtCase),
         Pretty: true,
     })
 
