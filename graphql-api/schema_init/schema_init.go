@@ -38,7 +38,9 @@ var courtCaseType = graphql.NewObject(graphql.ObjectConfig{
     },
 })
 
-func SchemaInit(resolver func(p graphql.ResolveParams) (interface{}, error)) (*graphql.Schema) {
+func SchemaInit(
+	resolver func(p graphql.ResolveParams) (interface{}, error),
+) (*graphql.Schema) {
 	rootQuery := graphql.NewObject(graphql.ObjectConfig{
 		Name: "RootQuery",
 		Fields: graphql.Fields{
