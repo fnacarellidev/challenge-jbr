@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
+	"errors"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -60,8 +63,21 @@ func AddCourtCase(p graphql.ResolveParams) (interface{}, error) {
 			UpdateDetails: updateDetails,
 		})
 	}
+	endpoint := os.Getenv("BACKEND_API_URL")+"register_court_case"
+	b, _ := json.Marshal(courtCase)
+	res, err := http.Post(endpoint, "application/json", bytes.NewBuffer(b))
+	if err != nil {
+		return nil, err
+	}
 
-	return nil, nil
+	if res.StatusCode != http.StatusOK {
+		bytes, _ := io.ReadAll(res.Body)
+		return nil, errors.New(string(bytes))
+	}
+
+	return map[string]interface{}{
+		"cnj": courtCase.Cnj,
+	}, nil
 }
 
 func main() {
