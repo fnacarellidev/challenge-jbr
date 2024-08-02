@@ -50,6 +50,11 @@ func resolver(p graphql.ResolveParams) (interface{}, error) {
 	var courtCase types.CourtCase
 	rr := httptest.NewRecorder()
 	router.ServeHTTP(rr, req)
+
+	if rr.Result().StatusCode != http.StatusOK {
+		return nil, nil
+	}
+
 	bytes, _ := io.ReadAll(rr.Body)
 	err = json.Unmarshal(bytes, &courtCase)
 	if err != nil {
@@ -226,6 +231,93 @@ func (suite *GraphQLApiTestSuite) TestFetchCourtCaseAliceBobPlaintiffDefendant()
 	courtCase := graphQLResponse.Data.CourtCase
 	assert.Equal(t, expectedPlaintiff, courtCase.Plaintiff, "plaintiff does not match")
 	assert.Equal(t, expectedDefendant, courtCase.Defendant, "defendant does not match")
+}
+
+func (suite *GraphQLApiTestSuite) TestFetchCourtThatDoesntExist() {
+	t := suite.T()
+	query := `
+	{
+		"query": "query($cnj: String!) { court_case(cnj: $cnj) { plaintiff defendant } }",
+		"variables": {
+			"cnj": "courtcasethatdoesntexist"
+		}
+	}
+	`
+	jsonStr := []byte(query)
+	req, err := http.NewRequest("POST", "/graphql", bytes.NewBuffer(jsonStr))
+	if err != nil {
+		t.Errorf("GET request failed: %v", err)
+	}
+
+	rr := httptest.NewRecorder()
+	suite.router.ServeHTTP(rr, req)
+	bytes, err := io.ReadAll(rr.Body)
+	if err != nil {
+		log.Println("failed to read bytes", err)
+	}
+
+	var graphQLResponse GraphQLResponse
+	err = json.Unmarshal(bytes, &graphQLResponse)
+	if err != nil {
+		log.Println("failed to unmarshal graphql", err)
+	}
+
+	assert.Equal(t, graphQLResponse.Data.CourtCase, types.CourtCase{})
+}
+
+func (suite *GraphQLApiTestSuite) TestFetchOnlyUpdatesFromCourtCase() {
+	t := suite.T()
+	expectedUpdates := []string{
+		"Defendant requested a delay for response.",
+		"Plaintiff submitted additional evidence.",
+		"Initial hearing scheduled for August 15, 2024.",
+	}
+	expectedUpdatesDates := []time.Time{
+		time.Date(2024, 8, 2, 6, 0, 0, 0, time.Local),
+		time.Date(2024, 8, 1, 11, 30, 0, 0, time.Local),
+		time.Date(2024, 7, 31, 7, 0, 0, 0, time.Local),
+	}
+	query := `
+	{
+		"query": "query($cnj: String!) { court_case(cnj: $cnj) { updates { update_date update_details } } }",
+		"variables": {
+			"cnj": "5001682-88.2024.8.13.0672"
+		}
+	}
+	`
+	jsonStr := []byte(query)
+	req, err := http.NewRequest("POST", "/graphql", bytes.NewBuffer(jsonStr))
+	if err != nil {
+		t.Errorf("GET request failed: %v", err)
+	}
+
+	rr := httptest.NewRecorder()
+	suite.router.ServeHTTP(rr, req)
+	bytes, err := io.ReadAll(rr.Body)
+	if err != nil {
+		log.Println("failed to read bytes", err)
+	}
+
+	var graphQLResponse struct {
+		Data struct {
+			CourtCase struct {
+				Updates []types.CaseUpdate `json:"updates"`
+			} `json:"court_case"`
+		} `json:"data"`
+	}
+	err = json.Unmarshal(bytes, &graphQLResponse)
+	if err != nil {
+		log.Println("failed to unmarshal graphql", err)
+	}
+
+	courtCase := graphQLResponse.Data.CourtCase
+
+	assert.Equal(t, expectedUpdates[1], courtCase.Updates[1].UpdateDetails, "Second update does not match")
+	assert.Equal(t, expectedUpdates[2], courtCase.Updates[2].UpdateDetails, "Third update does not match")
+	assert.Equal(t, expectedUpdates[0], courtCase.Updates[0].UpdateDetails, "first update does not match")
+	assert.Equal(t, expectedUpdatesDates[0], courtCase.Updates[0].UpdateDate, "First update date does not match")
+	assert.Equal(t, expectedUpdatesDates[1], courtCase.Updates[1].UpdateDate, "Second update date does not match")
+	assert.Equal(t, expectedUpdatesDates[2], courtCase.Updates[2].UpdateDate, "Third update date does not match")
 }
 
 func TestGraphQLApiSuite(t *testing.T) {
