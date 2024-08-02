@@ -11,7 +11,6 @@ func main() {
 	router := httprouter.New()
 	router.POST("/register_court_case", endpoints.RegisterCourtCase)
 	router.GET("/fetch_court_case/:cnj", endpoints.FetchCourtCase)
-	router.GET("/fetch_updates_from_case/:cnj", endpoints.FetchUpdatesFromCase)
 	router.GET("/healthcheck", endpoints.Healthcheck)
 	http.ListenAndServe(":8081", router)
 }

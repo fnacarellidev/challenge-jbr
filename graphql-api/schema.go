@@ -40,6 +40,9 @@ var courtCaseType = graphql.NewObject(graphql.ObjectConfig{
         "start_date": &graphql.Field{
             Type: graphql.DateTime,
         },
+		"updates": &graphql.Field{
+			Type: graphql.NewList(caseUpdateType),
+		},
     },
 })
 
@@ -64,26 +67,8 @@ func FetchBackendCourtCase(p graphql.ResolveParams) (interface{}, error) {
 		"defendant": courtCase.Defendant,
 		"court_of_origin": courtCase.CourtOfOrigin,
 		"start_date": courtCase.StartDate,
+		"updates": courtCase.Updates,
 	}, nil
-}
-
-func FetchBackendCaseUpdate(p graphql.ResolveParams) (interface{}, error) {
-	cnj, _ := p.Args["cnj"].(string)
-	endpoint := os.Getenv("BACKEND_API_URL")+"fetch_updates_from_case/"+cnj
-	r, err := http.Get(endpoint)
-	if err != nil {
-		log.Println("GET at", endpoint, "failed with reason", err)
-		return nil, nil
-	}
-
-	var caseUpdates []types.CaseUpdate
-	err = json.NewDecoder(r.Body).Decode(&caseUpdates)
-	if err != nil {
-		log.Println("error:", err)
-		return nil, nil
-	}
-
-	return caseUpdates, nil
 }
 
 var rootQuery = graphql.NewObject(graphql.ObjectConfig{
@@ -97,15 +82,6 @@ var rootQuery = graphql.NewObject(graphql.ObjectConfig{
 				},
 			},
 			Resolve: FetchBackendCourtCase,
-		},
-		"case_updates": &graphql.Field{
-			Type: graphql.NewList(caseUpdateType),
-			Args: graphql.FieldConfigArgument{
-				"cnj": &graphql.ArgumentConfig{
-					Type: graphql.String,
-				},
-			},
-			Resolve: FetchBackendCaseUpdate,
 		},
 	},
 })

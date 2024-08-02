@@ -6,11 +6,12 @@ import (
 )
 
 type CourtCase struct {
-	Cnj           string    `json:"cnj"`
-	Plaintiff     string    `json:"plaintiff"`
-	Defendant     string    `json:"defendant"`
-	CourtOfOrigin string    `json:"court_of_origin"`
-	StartDate     time.Time `json:"start_date"`
+	Cnj           string       `json:"cnj"`
+	Plaintiff     string       `json:"plaintiff"`
+	Defendant     string       `json:"defendant"`
+	CourtOfOrigin string       `json:"court_of_origin"`
+	StartDate     time.Time    `json:"start_date"`
+	Updates       []CaseUpdate `json:"updates"`
 }
 
 type CaseUpdate struct {
