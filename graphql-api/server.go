@@ -21,17 +21,17 @@ func FetchBackendCourtCase(p graphql.ResolveParams) (interface{}, error) {
 	endpoint := os.Getenv("BACKEND_API_URL")+"fetch_court_case/"+cnj
 	r, err := http.Get(endpoint)
 	if err != nil {
-		log.Println("GET at", endpoint, "failed with reason", err)
-		return nil, nil
+		return nil, err
 	}
 	if r.StatusCode != http.StatusOK {
-		return nil, nil
+		bytes, _ := io.ReadAll(r.Body)
+		return nil, errors.New(string(bytes))
 	}
 
 	var courtCase types.CourtCase
 	err = json.NewDecoder(r.Body).Decode(&courtCase)
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 
 	return map[string]interface{}{
