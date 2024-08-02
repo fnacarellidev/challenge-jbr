@@ -1,13 +1,14 @@
 package endpoints
 
 import (
-	"os"
-	"log"
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
+	"os"
 
 	"github.com/fnacarellidev/challenge-jbr/backend/.sqlcbuild/pgquery"
+	"github.com/fnacarellidev/challenge-jbr/backend/endpoints/utils"
 	"github.com/fnacarellidev/challenge-jbr/types"
 	"github.com/jackc/pgx/v5"
 	"github.com/julienschmidt/httprouter"
@@ -24,7 +25,7 @@ func FetchUpdatesFromCase(w http.ResponseWriter, r *http.Request, ps httprouter.
 	sqlc := pgquery.New(conn)
 	rows, err := sqlc.GetCaseUpdates(context.Background(), cnjLookup)
 	if err != nil {
-		log.Println("err:", err)
+		utils.SendError(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
 
@@ -37,11 +38,6 @@ func FetchUpdatesFromCase(w http.ResponseWriter, r *http.Request, ps httprouter.
 		CaseUpdates = append(CaseUpdates, CaseUpdate)
 	}
 
-	jsonBytes, err := json.Marshal(CaseUpdates)
-	if err != nil {
-		http.Error(w, "Internal error", http.StatusInternalServerError)
-		return
-	}
-
+	jsonBytes, _ := json.Marshal(CaseUpdates)
 	w.Write(jsonBytes)
 }
