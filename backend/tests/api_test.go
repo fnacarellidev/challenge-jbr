@@ -48,6 +48,16 @@ func (suite *BackendApiTestSuite) TestFetchCourtCaseAliceBob() {
 	expectedPlaintiff := "Alice Johnson"
 	expectedDefendant := "Bob Smith"
 	expectedCourtOfOrigin := "TJSP"
+	expectedUpdates := []string{
+		"Defendant requested a delay for response.",
+		"Plaintiff submitted additional evidence.",
+		"Initial hearing scheduled for August 15, 2024.",
+	}
+	expectedUpdatesDates := []time.Time{
+		time.Date(2024, 8, 2, 6, 0, 0, 0, time.Local),
+		time.Date(2024, 8, 1, 11, 30, 0, 0, time.Local),
+		time.Date(2024, 7, 31, 7, 0, 0, 0, time.Local),
+	}
 	endpoint := "/fetch_court_case/5001682-88.2024.8.13.0672"
 	router.GET("/fetch_court_case/:cnj", endpoints.FetchCourtCase)
 
@@ -71,6 +81,12 @@ func (suite *BackendApiTestSuite) TestFetchCourtCaseAliceBob() {
 	assert.Equal(t, expectedPlaintiff, courtCase.Plaintiff, "Plaintiff name does not match")
 	assert.Equal(t, expectedDefendant, courtCase.Defendant, "Defendant name does not match")
 	assert.Equal(t, expectedCourtOfOrigin, courtCase.CourtOfOrigin, "Court of Origin does not match")
+	assert.Equal(t, expectedUpdates[0], courtCase.Updates[0].UpdateDetails, "First update does not match")
+	assert.Equal(t, expectedUpdates[1], courtCase.Updates[1].UpdateDetails, "Second update does not match")
+	assert.Equal(t, expectedUpdates[2], courtCase.Updates[2].UpdateDetails, "Third update does not match")
+	assert.Equal(t, expectedUpdatesDates[0], courtCase.Updates[0].UpdateDate, "First update date does not match")
+	assert.Equal(t, expectedUpdatesDates[1], courtCase.Updates[1].UpdateDate, "Second update date does not match")
+	assert.Equal(t, expectedUpdatesDates[2], courtCase.Updates[2].UpdateDate, "Third update date does not match")
 }
 
 func (suite *BackendApiTestSuite) TestFetchCourtCaseMichaelSarah() {
@@ -79,6 +95,18 @@ func (suite *BackendApiTestSuite) TestFetchCourtCaseMichaelSarah() {
 	expectedPlaintiff := "Michael Brown"
 	expectedDefendant := "Sarah Davis"
 	expectedCourtOfOrigin := "TJSP"
+	expectedUpdates := []string{
+		"Hearing date scheduled for August 10, 2024.",
+		"Defendant’s lawyer filed a motion for dismissal.",
+		"Witness statements collected.",
+		"Case file reviewed by judge.",
+	}
+	expectedUpdatesDates := []time.Time{
+		time.Date(2024, 8, 3, 7, 0, 0, 0, time.Local),
+		time.Date(2024, 8, 2, 10, 45, 0, 0, time.Local),
+		time.Date(2024, 8, 1, 6, 30, 0, 0, time.Local),
+		time.Date(2024, 7, 30, 8, 0, 0, 0, time.Local),
+	}
 	endpoint := "/fetch_court_case/3562061-02.2024.8.13.0431"
 	router.GET("/fetch_court_case/:cnj", endpoints.FetchCourtCase)
 
@@ -102,6 +130,14 @@ func (suite *BackendApiTestSuite) TestFetchCourtCaseMichaelSarah() {
 	assert.Equal(t, expectedPlaintiff, courtCase.Plaintiff, "Plaintiff name does not match")
 	assert.Equal(t, expectedDefendant, courtCase.Defendant, "Defendant name does not match")
 	assert.Equal(t, expectedCourtOfOrigin, courtCase.CourtOfOrigin, "Court of Origin does not match")
+	assert.Equal(t, expectedUpdates[0], courtCase.Updates[0].UpdateDetails, "First update does not match")
+	assert.Equal(t, expectedUpdates[1], courtCase.Updates[1].UpdateDetails, "Second update does not match")
+	assert.Equal(t, expectedUpdates[2], courtCase.Updates[2].UpdateDetails, "Third update does not match")
+	assert.Equal(t, expectedUpdates[3], courtCase.Updates[3].UpdateDetails, "Fourth update does not match")
+	assert.Equal(t, expectedUpdatesDates[0], courtCase.Updates[0].UpdateDate, "First update date does not match")
+	assert.Equal(t, expectedUpdatesDates[1], courtCase.Updates[1].UpdateDate, "Second update date does not match")
+	assert.Equal(t, expectedUpdatesDates[2], courtCase.Updates[2].UpdateDate, "Third update date does not match")
+	assert.Equal(t, expectedUpdatesDates[3], courtCase.Updates[3].UpdateDate, "Fourth update date does not match")
 }
 
 func (suite *BackendApiTestSuite) TestFetchCourtCaseThatDoesntExist() {
