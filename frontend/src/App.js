@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import SearchPage from "./pages/search/SearchPage"
+import Case from "./pages/case/Case"
 
 export default function App() {
 	return (
@@ -7,7 +8,7 @@ export default function App() {
 			<BrowserRouter>
 				<Routes>
 					<Route path="/" element={<SearchPage />} />
-					<Route path="/case" element={<h1> Hello World </h1>} />
+					<Route path="/case" element={<Case />} />
 				</Routes>
 			</BrowserRouter>
 		</>
