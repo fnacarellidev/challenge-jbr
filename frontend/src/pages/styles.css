@@ -28,5 +28,11 @@ h3, .search-page-title {
 
 .search-bar-wrapper {
 	display: flex;
+	margin-top: 4px;
 	justify-content: center;
+}
+
+.search-page-error-msg {
+	margin-top: 4px;
+	text-align: center;
 }

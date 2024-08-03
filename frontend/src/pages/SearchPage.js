@@ -4,6 +4,7 @@ import "./styles.css"
 export default function SearchPage() {
 
 	const [cnj, setCnj] = useState("")
+	const [err, setErr] = useState(false)
 
 	async function fetchStuff() {
 		const endpoint = "http://localhost:8080/graphql"
@@ -21,15 +22,17 @@ export default function SearchPage() {
 			body: query,
 		})
 
-		console.log(res.status)
-		const json = await res.json()
-		console.log(json)
+		const graphql = await res.json()
+		setErr('errors' in graphql)
 	}
 
 	return (
 		<div className="search-page-wrapper">
 			<h1 className="search-page-title">Buscar</h1>
 			<h3>Busque um processo a partir do número unificado</h3>
+			{ err &&
+				<p className="search-page-error-msg">⚠️ Não foi encontrado nenhum processo de cnj {cnj}</p>
+			}
 			<div className="search-bar-wrapper">
 				<input className="search-page-input" type="text" onChange={(e) => setCnj(e.target.value)} placeholder="Número de processo" />
 				<button className="search-page-button" onClick={fetchStuff}>Buscar</button>
