@@ -1,5 +1,10 @@
 # Desafio Consulta Processual
 
+## Requisitos
+
+- Docker
+- Go >= 1.22
+
 ## Modelo De Dados
 
 ![database schema](https://github.com/fnacarellidev/challenge-jbr/blob/main/assets/schema.png)
