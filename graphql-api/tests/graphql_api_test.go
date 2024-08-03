@@ -462,6 +462,108 @@ func (suite *GraphQLApiTestSuite) TestInsertCourtCaseThatAlreadyExist() {
 	assert.Equal(t, "case already exists", graphQLResponse.Errors[0].Message, "error message did not match")
 }
 
+func (suite *GraphQLApiTestSuite) TestInsertCourtCaseWithWrongTypes() {
+	t := suite.T()
+	query := `
+	{
+		"query": "mutation new_court_case($cnj: String!, $plaintiff: String!, $defendant: String!, $court_of_origin: String!, $start_date: DateTime!, $updates: [CaseUpdateInput]) { new_court_case(cnj: $cnj, plaintiff: $plaintiff, defendant: $defendant, court_of_origin: $court_of_origin, start_date: $start_date, updates: $updates) { cnj } }",
+		"variables": {
+			"cnj": "12345-67.2024.8.1.0001",
+			"plaintiff": "John Doe",
+			"defendant": "Foo Bar",
+			"court_of_origin": "First Court",
+			"start_date": "abc",
+			"updates": [
+			{
+				"update_date": "2024-02-01T00:00:00Z",
+				"update_details": "Initial hearing scheduled"
+			},
+			{
+				"update_date": "2024-03-01T00:00:00Z",
+				"update_details": "Preliminary ruling issued"
+			}
+			]
+		}
+	}
+	`
+	jsonStr := []byte(query)
+	req, _ := http.NewRequest("POST", "/graphql", bytes.NewBuffer(jsonStr))
+	rr := httptest.NewRecorder()
+	suite.router.ServeHTTP(rr, req)
+	bytes, err := io.ReadAll(rr.Body)
+	if err != nil {
+		log.Println("failed to read bytes", err)
+	}
+
+	var graphQLResponse struct {
+		Errors []struct {
+			Message string `json:"message"`
+		} `json:"errors"`
+	}
+	err = json.Unmarshal(bytes, &graphQLResponse)
+	if err != nil {
+		log.Println("failed to unmarshal graphql", err)
+	}
+
+	assert.GreaterOrEqual(t, 1, len(graphQLResponse.Errors), "amount of errors was not >= 1")
+	assert.Equal(t,
+		"Variable \"$start_date\" got invalid value \"abc\".\nExpected type \"DateTime\", found \"abc\".",
+		graphQLResponse.Errors[0].Message,
+		"error message did not match",
+	)
+}
+
+func (suite *GraphQLApiTestSuite) TestInsertCourtCaseWithEmptyCnj() {
+	t := suite.T()
+	query := `
+	{
+		"query": "mutation new_court_case($cnj: String!, $plaintiff: String!, $defendant: String!, $court_of_origin: String!, $start_date: DateTime!, $updates: [CaseUpdateInput]) { new_court_case(cnj: $cnj, plaintiff: $plaintiff, defendant: $defendant, court_of_origin: $court_of_origin, start_date: $start_date, updates: $updates) { cnj } }",
+		"variables": {
+			"cnj": "",
+			"plaintiff": "John Doe",
+			"defendant": "Foo Bar",
+			"court_of_origin": "First Court",
+			"start_date": "2024-03-01T00:00:00Z",
+			"updates": [
+			{
+				"update_date": "2024-02-01T00:00:00Z",
+				"update_details": "Initial hearing scheduled"
+			},
+			{
+				"update_date": "2024-03-01T00:00:00Z",
+				"update_details": "Preliminary ruling issued"
+			}
+			]
+		}
+	}
+	`
+	jsonStr := []byte(query)
+	req, _ := http.NewRequest("POST", "/graphql", bytes.NewBuffer(jsonStr))
+	rr := httptest.NewRecorder()
+	suite.router.ServeHTTP(rr, req)
+	bytes, err := io.ReadAll(rr.Body)
+	if err != nil {
+		log.Println("failed to read bytes", err)
+	}
+
+	var graphQLResponse struct {
+		Errors []struct {
+			Message string `json:"message"`
+		} `json:"errors"`
+	}
+	err = json.Unmarshal(bytes, &graphQLResponse)
+	if err != nil {
+		log.Println("failed to unmarshal graphql", err)
+	}
+
+	assert.GreaterOrEqual(t, 1, len(graphQLResponse.Errors), "amount of errors was not >= 1")
+	assert.Equal(t,
+		"cnj field cannot be empty",
+		graphQLResponse.Errors[0].Message,
+		"error message did not match",
+	)
+}
+
 func TestGraphQLApiSuite(t *testing.T) {
     suite.Run(t, new(GraphQLApiTestSuite))
 }
