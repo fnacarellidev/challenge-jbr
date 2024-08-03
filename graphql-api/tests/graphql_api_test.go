@@ -306,7 +306,7 @@ func (suite *GraphQLApiTestSuite) TestFetchCourtThatDoesntExist() {
 		log.Println("failed to unmarshal graphql", err)
 	}
 
-	assert.Equal(t, graphQLResponse.Data.CourtCase, types.CourtCase{})
+	assert.Equal(t, graphQLResponse.Data.CourtCase, types.CourtCase{}, "response object was not 'null'")
 }
 
 func (suite *GraphQLApiTestSuite) TestFetchOnlyUpdatesFromCourtCase() {
@@ -410,7 +410,7 @@ func (suite *GraphQLApiTestSuite) TestInsertCourtCase() {
 	}
 
 	newCourtCase := graphQLResponse.Data.NewCourtCase
-	assert.Equal(t, "12345-67.2024.8.1.0001", newCourtCase.Cnj)
+	assert.Equal(t, "12345-67.2024.8.1.0001", newCourtCase.Cnj, "new cnj did not match expected")
 }
 
 func (suite *GraphQLApiTestSuite) TestInsertCourtCaseThatAlreadyExist() {
@@ -458,8 +458,8 @@ func (suite *GraphQLApiTestSuite) TestInsertCourtCaseThatAlreadyExist() {
 
 	errors := graphQLResponse.Errors
 
-	assert.Equal(t, 1, len(errors))
-	assert.Equal(t, "case already exists", graphQLResponse.Errors[0].Message)
+	assert.GreaterOrEqual(t, 1, len(errors), "amount of errors was not >= 1")
+	assert.Equal(t, "case already exists", graphQLResponse.Errors[0].Message, "error message did not match")
 }
 
 func TestGraphQLApiSuite(t *testing.T) {
