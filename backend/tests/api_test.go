@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"io"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -200,6 +201,30 @@ func (suite *BackendApiTestSuite) TestInsertInvalidCourtCase() {
 	assert.Equal(t, http.StatusBadRequest, rr.Result().StatusCode, "Status does not match.")
 	assert.Equal(t, expectedResponse, string(rr.Body.Bytes()), "Err message does not match.")
 }
+
+func (suite *BackendApiTestSuite) TestInsertCourtCaseWithInvalidDate() {
+	t := suite.T()
+	router := httprouter.New()
+	endpoint := "/register_court_case"
+	router.POST(endpoint, endpoints.RegisterCourtCase)
+	strBody := `
+	{
+		"cnj": "321312",
+		"plaintiff": "Foo Bar",
+		"defendant": "Godskin",
+		"court_of_origin": "TJSP",
+		"start_date": "abc"
+	}
+	`
+	req, _ := http.NewRequest("POST", endpoint, bytes.NewBuffer([]byte(strBody)))
+	rr := httptest.NewRecorder()
+	router.ServeHTTP(rr, req)
+	byte, _ := io.ReadAll(rr.Result().Body)
+
+	assert.Equal(t, "invalid request payload", string(byte), "response did not match expected")
+	assert.Equal(t, rr.Result().StatusCode, http.StatusBadRequest, "Status does not match.")
+}
+
 
 func (suite *BackendApiTestSuite) TestInsertCourtCaseEmptyCnj() {
 	t := suite.T()
