@@ -7,6 +7,7 @@ export default function App() {
 			<BrowserRouter>
 				<Routes>
 					<Route path="/" element={<SearchPage />} />
+					<Route path="/case" element={<h1> Hello World </h1>} />
 				</Routes>
 			</BrowserRouter>
 		</>
