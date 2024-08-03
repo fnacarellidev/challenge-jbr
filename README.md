@@ -79,7 +79,7 @@ type CourtCase {
 **Testes realizados na operação new_court_case:**
 - Criar um processo.
 - Criar um processo com CNJ já cadastrado.
-- Criar um processo com CNJ vázio.
+- Criar um processo com CNJ vazio.
 - Criar um processo passando tipos incorretos.
 
 ### Como Executar Os Testes Do GraphQL
