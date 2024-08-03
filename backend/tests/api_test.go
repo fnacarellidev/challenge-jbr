@@ -150,11 +150,9 @@ func (suite *BackendApiTestSuite) TestFetchCourtCaseThatDoesntExist() {
 	req, _ := http.NewRequest("GET", endpoint, nil)
 	rr := httptest.NewRecorder()
 	router.ServeHTTP(rr, req)
-	var errResponse types.ErrResponse
-	json.Unmarshal(rr.Body.Bytes(), &errResponse)
 
 	assert.Equal(t, http.StatusNotFound, rr.Result().StatusCode, "Status was not 404.")
-	assert.Equal(t, expectedResponse, errResponse.Error, "Response body was not '404 not found'")
+	assert.Equal(t, expectedResponse, string(rr.Body.Bytes()), "Response body was not '404 not found'")
 }
 
 func (suite *BackendApiTestSuite) TestInsertCourtCaseThatExists() {
@@ -176,11 +174,9 @@ func (suite *BackendApiTestSuite) TestInsertCourtCaseThatExists() {
 	req, _ := http.NewRequest("POST", endpoint, bytes.NewBuffer(jsonBody))
 	rr := httptest.NewRecorder()
 	router.ServeHTTP(rr, req)
-	var errResponse types.ErrResponse
-	json.Unmarshal(rr.Body.Bytes(), &errResponse)
 
 	assert.Equal(t, http.StatusConflict, rr.Result().StatusCode, "Status does not match.")
-	assert.Equal(t, expectedResponse, errResponse.Error, "Err message does not match.")
+	assert.Equal(t, expectedResponse, string(rr.Body.Bytes()), "Err message does not match.")
 }
 
 func (suite *BackendApiTestSuite) TestInsertInvalidCourtCase() {
@@ -200,11 +196,9 @@ func (suite *BackendApiTestSuite) TestInsertInvalidCourtCase() {
 	req, _ := http.NewRequest("POST", endpoint, bytes.NewBuffer(jsonBody))
 	rr := httptest.NewRecorder()
 	router.ServeHTTP(rr, req)
-	var errResponse types.ErrResponse
-	json.Unmarshal(rr.Body.Bytes(), &errResponse)
 
 	assert.Equal(t, http.StatusBadRequest, rr.Result().StatusCode, "Status does not match.")
-	assert.Equal(t, expectedResponse, errResponse.Error, "Err message does not match.")
+	assert.Equal(t, expectedResponse, string(rr.Body.Bytes()), "Err message does not match.")
 }
 
 func (suite *BackendApiTestSuite) TestInsertCourtCaseEmptyCnj() {
@@ -226,11 +220,9 @@ func (suite *BackendApiTestSuite) TestInsertCourtCaseEmptyCnj() {
 	req, _ := http.NewRequest("POST", endpoint, bytes.NewBuffer(jsonBody))
 	rr := httptest.NewRecorder()
 	router.ServeHTTP(rr, req)
-	var errResponse types.ErrResponse
-	json.Unmarshal(rr.Body.Bytes(), &errResponse)
 
 	assert.Equal(t, http.StatusBadRequest, rr.Result().StatusCode, "Status does not match.")
-	assert.Equal(t, expectedResponse, errResponse.Error, "Err message does not match.")
+	assert.Equal(t, expectedResponse, string(rr.Body.Bytes()), "Err message does not match.")
 }
 
 func TestBackendApiSuite(t *testing.T) {
