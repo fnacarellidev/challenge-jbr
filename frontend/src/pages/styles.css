@@ -1,0 +1,32 @@
+h3, .search-page-title {
+	text-align: center;
+}
+
+.search-page-wrapper {
+	padding: 16px;
+	background-color: #e0e0e0;
+}
+
+.search-page-input {
+  padding: 8px;
+  font-size: 14px;
+  margin-right: 4px;
+  border-radius: 4px;
+  border: 1px solid #CCCCCC;
+  width: 300px;
+}
+
+.search-page-button {
+	color: #FFFFFF;
+	cursor: pointer;
+	font-size: 16px;
+	padding: 4px 8px;
+	border-radius: 4px;
+	background-color: #333333;
+	text-transform: uppercase;
+}
+
+.search-bar-wrapper {
+	display: flex;
+	justify-content: center;
+}
