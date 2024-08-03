@@ -28,7 +28,7 @@
 **Testes realizados na API (backend/tests/api_test.go):**
 - Recuperar um processo já registrado (Alice X Bob) e toda a informação a respeito do processo.
 - Recuperar um processo já registrado (Michael X Sarah) e toda a informação a respeito do processo.
-- Recuperar um processo que não existe.
+- Recuperar um processo que foi registrado.
 - Criar um processo que já esta registrado (CNJ duplicado).
 - Criar um processo passando informações que não são aceitas pela API.
 - Criar um processo com um campo faltando (CNJ).
@@ -43,3 +43,49 @@ Para executar os testes a partir da raiz do projeto:
 ```bash
 $ go test ./backend/tests -v
 ```
+
+## GraphQL API
+
+### Objetos 
+```
+type CaseUpdateInput {
+    update_date: DateTime!
+    update_details: String!
+}
+
+type CourtCase {
+    cnj: String!
+    plaintiff: String!
+    defendant: String!
+    court_of_origin: String!
+    start_date: String!
+    updates: [CaseUpdateInput]!
+}
+```
+
+### Operações Disponíveis
+- **court_case(cnj: String!):** Query que recupera o processo judicial com o CNJ recebido.
+- **new_court_case(cnj: String!, plaintiff: String!, defendant: String!, court_of_origin: String!, start_date: DateTime!, updates: \[CaseUpdateInput\])**: Mutation que cria um processo judicial com os parâmetros passados.
+
+### Testes Realizados
+
+**Testes realizados na operação court_case:**
+- Recuperar todas as informações de um caso específico (Alice X Bob)
+- Recuperar apenas Autor e Réu de um caso específico (Alice X Bob)
+- Recuperar apenas Autor de um caso específico (Alice X Bob)
+- Recuperar um caso que não foi registrado.
+- Recuperar apenas as atualizações de um caso específico (Alice X Bob)
+
+**Testes realizados na operação new_court_case:**
+- Criar um processo.
+- Criar um processo com CNJ já cadastrado.
+- Criar um processo com CNJ vázio.
+- Criar um processo passando tipos incorretos.
+
+### Como Executar Os Testes Do GraphQL
+
+Para executar os testes a partir da raiz do projeto:
+```bash
+$ go test ./graphql-api/tests -v
+```
+
