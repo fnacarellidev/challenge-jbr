@@ -7,11 +7,12 @@ export default function SearchPage() {
 	const [cnj, setCnj] = useState("")
 	const [err, setErr] = useState(false)
 	const [errMsg, setErrMsg] = useState("")
+	const [courtCase, setCourtCase] = useState(null)
 	const navigate = useNavigate();
 
 	useEffect(() => {
-		if (!err && cnj) navigate("/case")
-	}, [err])
+		if (!err && courtCase) navigate("/case", { state: { courtCase } })
+	}, [err, courtCase])
 
 	async function fetchCourtCase() {
 		const endpoint = "http://localhost:8080/graphql"
@@ -30,9 +31,14 @@ export default function SearchPage() {
 		})
 
 		const graphql = await res.json()
-		setErr('errors' in graphql)
-		if ('errors' in graphql)
+		if ('errors' in graphql) {
 			setErrMsg(`⚠️ Não foi encontrado nenhum processo de cnj ${cnj}`)
+			setErr(true)
+		}
+		else {
+			setCourtCase(graphql.data)
+			setErr(false)
+		}
 	}
 
 	return (
