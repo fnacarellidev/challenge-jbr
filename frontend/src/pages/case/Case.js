@@ -1,4 +1,5 @@
 import { useLocation } from "react-router-dom";
+import SearchBar from "../../components/SearchBar"
 import "./styles.css"
 
 export default function Case() {
@@ -17,6 +18,9 @@ export default function Case() {
 
 	return (
 		<>
+			<div className="search-bar-wrapper-case-page">
+				<SearchBar />
+			</div>
 			<div style={{ margin: '16px 34px' }}>
 				<h2 style={{ fontWeight: '400' }}>
 					Processo n. { courtCase.court_case.cnj } do { courtCase.court_case.court_of_origin }
