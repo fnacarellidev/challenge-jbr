@@ -17,24 +17,24 @@ export default function SearchPage() {
 
 	async function fetchCourtCase() {
 		const endpoint = "http://localhost:8080/graphql"
-		const query = `{
-			"query": "query($cnj: String!, $court_of_origin: String!) { court_case(cnj: $cnj, court_of_origin: $court_of_origin) { cnj plaintiff defendant court_of_origin start_date updates { update_date update_details } } }",
-				"variables":{
-					"cnj": "${cnj}",
-					"court_of_origin": "${courtOfOrigin}"
-				}
-			}`
+		const query = {
+			query: "query($cnj: String!, $court_of_origin: String!) { court_case(cnj: $cnj, court_of_origin: $court_of_origin) { cnj plaintiff defendant court_of_origin start_date updates { update_date update_details } } }",
+			variables: {
+				cnj: cnj,
+				court_of_origin: courtOfOrigin
+			}
+		}
 		const res = await fetch(endpoint, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
 			},
-			body: query,
+			body: JSON.stringify(query),
 		})
 
 		const graphql = await res.json()
 		if ('errors' in graphql) {
-			setErrMsg(`⚠️ Não foi encontrado nenhum processo de cnj ${cnj}`)
+			setErrMsg(`⚠️ Não foi encontrado nenhum processo de cnj ${cnj} no tribunal ${courtOfOrigin}`)
 			setErr(true)
 		}
 		else {
