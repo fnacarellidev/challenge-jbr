@@ -1,4 +1,5 @@
 import { useState } from "react"
+import "./styles.css"
 
 export default function RegisterCase() {
 	const [cnj, setCnj] = useState("")
@@ -53,30 +54,29 @@ export default function RegisterCase() {
 		})
 
 		const graphql = await res.json()
-		console.log(graphql)
 	};
 
 
 	return (
 		<form onSubmit={handleSubmit}>
-			<input type="text" name="cnj" placeholder="CNJ" value={cnj} onChange={(e) => setCnj(e.target.value)} />
-			<input type="text" name="plaintiff" placeholder="Autor" value={plaintiff} onChange={(e) => setPlaintiff(e.target.value)} />
-			<input type="text" name="defendant" placeholder="Réu" value={defendant} onChange={(e) => setDefendant(e.target.value)} />
-			<input type="text" name="court_of_origin" placeholder="Tribunal" value={courtOfOrigin} onChange={(e) => setCourtOfOrigin(e.target.value)} />
-			<input type="date" name="start_date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+			<input type="text" className="form-input pretty-input" name="cnj" placeholder="CNJ" value={cnj} onChange={(e) => setCnj(e.target.value)} />
+			<input type="text" className="form-input pretty-input" name="plaintiff" placeholder="Autor" value={plaintiff} onChange={(e) => setPlaintiff(e.target.value)} />
+			<input type="text" className="form-input pretty-input" name="defendant" placeholder="Réu" value={defendant} onChange={(e) => setDefendant(e.target.value)} />
+			<input type="text" className="form-input pretty-input" name="court_of_origin" placeholder="Tribunal" value={courtOfOrigin} onChange={(e) => setCourtOfOrigin(e.target.value)} />
+			<input type="date" className="form-input pretty-input" name="start_date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
 
 			{ updates.map((update, index) => (
 				<div key={index}>
-					<input type="datetime-local" name="update_date" value={update.update_date} onChange={e => handleChange(e, index)} />
-					<input type="text" name="update_details" placeholder="Update Details" value={update.update_details} onChange={e => handleChange(e, index)} />
+				<input type="datetime-local" className="pretty-input" name="update_date" value={update.update_date} onChange={e => handleChange(e, index)} />
+				<input type="text" className="pretty-input" name="update_details" placeholder="Update Details" value={update.update_details} onChange={e => handleChange(e, index)} />
 					{ updates.length > 1 && (
-						<button type="button" onClick={() => handleRemoveUpdate(index)}>Remove</button>
+						<button type="button" className="pretty-btn" onClick={() => handleRemoveUpdate(index)}>Remove</button>
 					)}
 				</div>
 			))}
 
-			<button type="button" onClick={handleAddUpdate}>Adicionar movimentação</button>
-			<button type="submit">Submit</button>
+			<button type="button" className="pretty-btn" style={{ display: 'block', marginBottom: '4px' }} onClick={handleAddUpdate}>Adicionar movimentação</button>
+			<button type="submit" className="pretty-btn">Submit</button>
 		</form>
 	);
 
