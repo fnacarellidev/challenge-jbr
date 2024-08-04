@@ -34,6 +34,11 @@ func FetchBackendCourtCase(p graphql.ResolveParams) (interface{}, error) {
 		return nil, err
 	}
 
+	courtOfOrigin, _ := p.Args["court_of_origin"].(string)
+	if courtCase.CourtOfOrigin != courtOfOrigin {
+		return nil, errors.New("no such case with cnj "+cnj+" at court "+courtOfOrigin)
+	}
+
 	return map[string]interface{}{
 		"cnj": courtCase.Cnj,
 		"plaintiff": courtCase.Plaintiff,

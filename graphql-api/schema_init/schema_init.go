@@ -63,6 +63,9 @@ func SchemaInit(
 					"cnj": &graphql.ArgumentConfig{
 						Type: graphql.String,
 					},
+					"court_of_origin": &graphql.ArgumentConfig{
+						Type: graphql.String,
+					},
 				},
 				Resolve: resolverFetch,
 			},
