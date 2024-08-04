@@ -38,3 +38,8 @@
 	margin-top: 4px;
 	text-align: center;
 }
+
+.div-center {
+	display: flex;
+	justify-content: center;
+}
