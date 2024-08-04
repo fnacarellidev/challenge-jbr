@@ -1,18 +1,19 @@
-h3, .search-page-title {
+.search-page-title {
 	text-align: center;
+	font-weight: 500;
 }
 
 .search-page-wrapper {
 	padding: 16px;
-	background-color: #e0e0e0;
+	background-color: #E0E0E0;
 }
 
 .search-page-input {
   padding: 8px;
   font-size: 14px;
-  margin-right: 4px;
+  margin-right: 8px;
   border-radius: 4px;
-  border: 1px solid #CCCCCC;
+  border: none;
   width: 300px;
 }
 
@@ -21,8 +22,9 @@ h3, .search-page-title {
 	cursor: pointer;
 	font-size: 16px;
 	padding: 4px 8px;
-	border-radius: 4px;
+	border-radius: 2px;
 	background-color: #333333;
+	border: none;
 	text-transform: uppercase;
 }
 

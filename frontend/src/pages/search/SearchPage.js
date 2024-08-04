@@ -44,7 +44,7 @@ export default function SearchPage() {
 	return (
 		<div className="search-page-wrapper">
 			<h1 className="search-page-title">Buscar</h1>
-			<h3>Busque um processo a partir do número unificado</h3>
+			<h3 style={{ textAlign: 'center', fontWeight: '400'}}>Busque um processo a partir do número unificado</h3>
 			{ err &&
 				<p className="search-page-error-msg">{errMsg}</p>
 			}
