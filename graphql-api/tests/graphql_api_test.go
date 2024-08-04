@@ -62,6 +62,11 @@ func FetchBackendCourtCase(p graphql.ResolveParams) (interface{}, error) {
 		log.Println("failed unmarshal")
 	}
 
+	courtOfOrigin, _ := p.Args["court_of_origin"].(string)
+	if courtCase.CourtOfOrigin != courtOfOrigin {
+		return nil, errors.New("no such case with cnj "+cnj+" at court "+courtOfOrigin)
+	}
+
 	return map[string]interface{}{
 		"cnj": courtCase.Cnj,
 		"plaintiff": courtCase.Plaintiff,
@@ -156,9 +161,10 @@ func (suite *GraphQLApiTestSuite) TestFetchCourtCaseAliceBobAllInfo() {
 	}
 	query := ` 
 	{
-		"query": "query($cnj: String!) { court_case(cnj: $cnj) { cnj plaintiff defendant court_of_origin start_date updates { update_date update_details } } }",
+		"query": "query($cnj: String!, $court_of_origin: String!) { court_case(cnj: $cnj, court_of_origin: $court_of_origin) { cnj plaintiff defendant court_of_origin start_date updates { update_date update_details } } }",
 		"variables": {
-			"cnj": "5001682-88.2024.8.13.0672"
+			"cnj": "5001682-88.2024.8.13.0672",
+			"court_of_origin": "TJSP"
 		}
 	}
 	`
@@ -199,9 +205,10 @@ func (suite *GraphQLApiTestSuite) TestFetchCourtCaseAliceBobPlaintiffOnly() {
 	expectedPlaintiff := "Alice Johnson"
 	query := ` 
 	{
-		"query": "query($cnj: String!) { court_case(cnj: $cnj) { plaintiff } }",
+		"query": "query($cnj: String!, $court_of_origin: String!) { court_case(cnj: $cnj, court_of_origin: $court_of_origin) { plaintiff } }",
 		"variables": {
-			"cnj": "5001682-88.2024.8.13.0672"
+			"cnj": "5001682-88.2024.8.13.0672",
+			"court_of_origin": "TJSP"
 		}
 	}
 	`
@@ -240,9 +247,10 @@ func (suite *GraphQLApiTestSuite) TestFetchCourtCaseAliceBobPlaintiffDefendant()
 	expectedDefendant := "Bob Smith"
 	query := ` 
 	{
-		"query": "query($cnj: String!) { court_case(cnj: $cnj) { plaintiff defendant } }",
+		"query": "query($cnj: String!, $court_of_origin: String!) { court_case(cnj: $cnj, court_of_origin: $court_of_origin) { plaintiff defendant } }",
 		"variables": {
-			"cnj": "5001682-88.2024.8.13.0672"
+			"cnj": "5001682-88.2024.8.13.0672",
+			"court_of_origin": "TJSP"
 		}
 	}
 	`
@@ -323,9 +331,10 @@ func (suite *GraphQLApiTestSuite) TestFetchOnlyUpdatesFromCourtCase() {
 	}
 	query := `
 	{
-		"query": "query($cnj: String!) { court_case(cnj: $cnj) { updates { update_date update_details } } }",
+		"query": "query($cnj: String!, $court_of_origin: String!) { court_case(cnj: $cnj, court_of_origin: $court_of_origin) { updates { update_date update_details } } }",
 		"variables": {
-			"cnj": "5001682-88.2024.8.13.0672"
+			"cnj": "5001682-88.2024.8.13.0672",
+			"court_of_origin": "TJSP"
 		}
 	}
 	`
