@@ -1,17 +1,20 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom";
 import "./styles.css"
 
 export default function RegisterCase() {
 	const [cnj, setCnj] = useState("")
+	const [err, setErr] = useState(false)
+	const [errMsg, setErrMsg] = useState("")
 	const [plaintiff, setPlaintiff] = useState("")
 	const [defendant, setDefendant] = useState("")
 	const [startDate, setStartDate] = useState("")
 	const [courtOfOrigin, setCourtOfOrigin] = useState("")
-	const [updates, setUpdates] = useState([{ update_date: '', update_details: '' }]);
+	const [updates, setUpdates] = useState([]);
+	const navigate = useNavigate()
 
 	function handleChange(e, index) {
 		const { name, value } = e.target;
-		console.log(name, value)
 		const list = [...updates];
 		list[index][name] = value;
 		setUpdates(list);
@@ -35,7 +38,7 @@ export default function RegisterCase() {
 			update.update_date = new Date(update.update_date).toISOString() // Need to do this copy, when I try to do that directly on the reactive variable it messes with the date input
 		})
 		const query = {
-			query: "mutation new_court_case($cnj: String!, $plaintiff: String!, $defendant: String!, $court_of_origin: String!, $start_date: DateTime!, $updates: [CaseUpdateInput]) { new_court_case(cnj: $cnj, plaintiff: $plaintiff, defendant: $defendant, court_of_origin: $court_of_origin, start_date: $start_date, updates: $updates) { cnj } }",
+			query: "mutation new_court_case($cnj: String!, $plaintiff: String!, $defendant: String!, $court_of_origin: String!, $start_date: DateTime!, $updates: [CaseUpdateInput]) { new_court_case(cnj: $cnj, plaintiff: $plaintiff, defendant: $defendant, court_of_origin: $court_of_origin, start_date: $start_date, updates: $updates) { cnj plaintiff defendant court_of_origin start_date updates { update_date update_details } } }",
 			variables: {
 				cnj: cnj,
 				plaintiff: plaintiff,
@@ -54,8 +57,17 @@ export default function RegisterCase() {
 		})
 
 		const graphql = await res.json()
+		if ('errors' in graphql) {
+			setErr(true)
+			setErrMsg("error: " + graphql.errors[0].message)
+		}
+		else {
+			const courtCase = {
+				court_case: graphql.data.new_court_case
+			}
+			navigate("/case", { state: { courtCase } })
+		}
 	};
-
 
 	return (
 		<form onSubmit={handleSubmit}>
@@ -69,11 +81,15 @@ export default function RegisterCase() {
 				<div key={index}>
 				<input type="datetime-local" className="pretty-input" name="update_date" value={update.update_date} onChange={e => handleChange(e, index)} />
 				<input type="text" className="pretty-input" name="update_details" placeholder="Update Details" value={update.update_details} onChange={e => handleChange(e, index)} />
-					{ updates.length > 1 && (
+					{ updates.length > 0 && (
 						<button type="button" className="pretty-btn" onClick={() => handleRemoveUpdate(index)}>Remove</button>
 					)}
 				</div>
 			))}
+
+			{ err &&
+				<p className="search-page-error-msg">{errMsg}</p>
+			}
 
 			<button type="button" className="pretty-btn" style={{ display: 'block', marginBottom: '4px' }} onClick={handleAddUpdate}>Adicionar movimentação</button>
 			<button type="submit" className="pretty-btn">Submit</button>

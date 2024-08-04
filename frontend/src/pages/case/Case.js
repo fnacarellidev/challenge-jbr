@@ -28,7 +28,7 @@ export default function Case() {
 				<p style={{ margin: '4px 0' }}>
 					Distribuído em { formatDate(courtCase.court_case.start_date) } | { courtCase.court_case.plaintiff } vs { courtCase.court_case.defendant }
 				</p>
-				<div class="updates-title-box">Movimentações</div>
+				<div className="updates-title-box">Movimentações</div>
 				{ courtCase.court_case.updates.map((update) => (
 					<div className="update-box-wrapper">
 					<p style={{ marginBottom: '8px'}}>{ formatDate(update.update_date) }</p>
