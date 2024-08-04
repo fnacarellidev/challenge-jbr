@@ -15,7 +15,7 @@ export default function SearchPage() {
 	}, [err, courtCase])
 
 	async function fetchCourtCase() {
-		const endpoint = "http://localhost:8080/graphql"
+		const endpoint = "http://graphql-api:8080/graphql"
 		const query = `{
 			"query": "query($cnj: String!) { court_case(cnj: $cnj) { cnj plaintiff defendant court_of_origin start_date updates { update_date update_details } } }",
 				"variables":{
