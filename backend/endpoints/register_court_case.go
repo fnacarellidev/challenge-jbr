@@ -48,5 +48,15 @@ func RegisterCourtCase(w http.ResponseWriter, r *http.Request, _ httprouter.Para
 	if err != nil {
 		utils.SendError(w, "case already exists", http.StatusConflict)
 	}
-}
 
+	for _, update := range courtCase.Updates {
+		sqlc.InsertCaseUpdate(context.Background(), pgquery.InsertCaseUpdateParams{
+			Cnj: courtCase.Cnj,
+			UpdateDate: pgtype.Timestamptz{
+				Time: update.UpdateDate,
+				Valid: true,
+			},
+			UpdateDetails: update.UpdateDetails,
+		})
+	}
+}

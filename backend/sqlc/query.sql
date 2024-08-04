@@ -11,3 +11,10 @@ SELECT * from court_case WHERE cnj = $1 LIMIT 1;
 
 -- name: GetCaseUpdates :many
 SELECT update_date, update_details FROM case_update WHERE cnj = $1 ORDER BY update_date DESC;
+
+-- name: InsertCaseUpdate :exec
+INSERT INTO case_update (
+	cnj, update_date, update_details
+) VALUES (
+	$1, $2, $3
+);

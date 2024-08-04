@@ -59,6 +59,25 @@ func (q *Queries) GetCourtCase(ctx context.Context, cnj string) (CourtCase, erro
 	return i, err
 }
 
+const insertCaseUpdate = `-- name: InsertCaseUpdate :exec
+INSERT INTO case_update (
+	cnj, update_date, update_details
+) VALUES (
+	$1, $2, $3
+)
+`
+
+type InsertCaseUpdateParams struct {
+	Cnj           string
+	UpdateDate    pgtype.Timestamptz
+	UpdateDetails string
+}
+
+func (q *Queries) InsertCaseUpdate(ctx context.Context, arg InsertCaseUpdateParams) error {
+	_, err := q.db.Exec(ctx, insertCaseUpdate, arg.Cnj, arg.UpdateDate, arg.UpdateDetails)
+	return err
+}
+
 const insertCourtCase = `-- name: InsertCourtCase :one
 INSERT INTO court_case (
 	cnj, plaintiff, defendant, court_of_origin, start_date
