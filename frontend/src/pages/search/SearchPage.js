@@ -5,6 +5,7 @@ import "./styles.css"
 export default function SearchPage() {
 
 	const [cnj, setCnj] = useState("")
+	const [courtOfOrigin, setCourtOfOrigin] = useState("")
 	const [err, setErr] = useState(false)
 	const [errMsg, setErrMsg] = useState("")
 	const [courtCase, setCourtCase] = useState(null)
@@ -15,11 +16,12 @@ export default function SearchPage() {
 	}, [err, courtCase])
 
 	async function fetchCourtCase() {
-		const endpoint = "http://graphql-api:8080/graphql"
+		const endpoint = "http://localhost:8080/graphql"
 		const query = `{
-			"query": "query($cnj: String!) { court_case(cnj: $cnj) { cnj plaintiff defendant court_of_origin start_date updates { update_date update_details } } }",
+			"query": "query($cnj: String!, $court_of_origin: String!) { court_case(cnj: $cnj, court_of_origin: $court_of_origin) { cnj plaintiff defendant court_of_origin start_date updates { update_date update_details } } }",
 				"variables":{
-					"cnj": "${cnj}"
+					"cnj": "${cnj}",
+					"court_of_origin": "${courtOfOrigin}"
 				}
 			}`
 		const res = await fetch(endpoint, {
@@ -49,7 +51,8 @@ export default function SearchPage() {
 				<p className="search-page-error-msg">{errMsg}</p>
 			}
 			<div className="search-bar-wrapper">
-				<input className="search-page-input" type="text" onChange={(e) => setCnj(e.target.value)} placeholder="Número de processo" />
+				<input className="search-page-input" style={{ width: '150px' }} type="text" onChange={(e) => setCourtOfOrigin(e.target.value)} placeholder="Tribunal" />
+				<input className="search-page-input cnj-input" type="text" onChange={(e) => setCnj(e.target.value)} placeholder="Número de processo" />
 				<button className="search-page-button" onClick={fetchCourtCase}>Buscar</button>
 			</div>
 		</div>
