@@ -82,6 +82,11 @@ func AddCourtCase(p graphql.ResolveParams) (interface{}, error) {
 
 	return map[string]interface{}{
 		"cnj": courtCase.Cnj,
+		"plaintiff": courtCase.Plaintiff,
+		"defendant": courtCase.Defendant,
+		"court_of_origin": courtCase.CourtOfOrigin,
+		"start_date": courtCase.StartDate,
+		"updates": courtCase.Updates,
 	}, nil
 }
 
