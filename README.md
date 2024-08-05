@@ -1,9 +1,20 @@
 # Desafio Consulta Processual
 
+O objetivo desse desafio é construir um sistema de consulta processual, onde terá um banco de dados
+já populado com alguns processos falsos, e recuperar esses processos por meio de uma API GraphQL.
+Também é possível cadastrar novos processos pelo frontend.
+
 ## Requisitos
 
 - Docker
 - Go >= 1.22
+
+## 🚀 Começando
+
+O frontend da aplicação estará disponível na porta 3000, para rodar o projeto basta executar:
+```bash
+$ docker compose up
+```
 
 ## Modelo De Dados
 
@@ -64,7 +75,7 @@ type CourtCase {
 ```
 
 ### Operações Disponíveis
-- **court_case(cnj: String!):** Query que recupera o processo judicial com o CNJ recebido.
+- **court_case(cnj: String!, court_of_origin: String!):** Query que recupera o processo a partir de um CNJ e Tribunal.
 - **new_court_case(cnj: String!, plaintiff: String!, defendant: String!, court_of_origin: String!, start_date: DateTime!, updates: \[CaseUpdateInput\])**: Mutation que cria um processo judicial com os parâmetros passados.
 
 ### Testes Realizados
@@ -88,4 +99,3 @@ Para executar os testes a partir da raiz do projeto:
 ```bash
 $ go test ./graphql-api/tests -v
 ```
-
