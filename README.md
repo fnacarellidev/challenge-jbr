@@ -15,6 +15,9 @@ O frontend da aplicação estará disponível na porta 3000, para rodar o projet
 ```bash
 $ docker compose up
 ```
+No arquivo ./postgres/02_mock-data.sql você consegue ver todas as informações que já são inseridas
+por padrão no banco de dado, por exemplo o processo de cnj '5001682-88.2024.8.13.0672', se consultar
+ele pelo frontend, você deve receber todas as informações a respeito do processo.
 
 ## Modelo De Dados
 
