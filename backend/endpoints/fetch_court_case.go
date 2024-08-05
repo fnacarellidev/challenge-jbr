@@ -32,7 +32,6 @@ func FetchUpdatesFromCase(cnj string, sqlc *pgquery.Queries) ([]types.CaseUpdate
 	return caseUpdates, nil
 }
 
-// todo think about case where the court has already been registered
 func FetchCourtCase(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	conn, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {
