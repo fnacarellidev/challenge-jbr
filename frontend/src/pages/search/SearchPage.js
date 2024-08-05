@@ -11,7 +11,7 @@ export default function SearchPage() {
 			<h3 style={{ textAlign: 'center', fontWeight: '400' }}>Busque um processo a partir do número unificado</h3>
 			<SearchBar />
 			<div className="div-center">
-			<button className="pretty-btn" style={{ marginTop: '8px'}} onClick={() => navigate("/register_case")}>Register Case</button>
+			<button className="pretty-btn" style={{ marginTop: '8px'}} onClick={() => navigate("/register_case")}>Registrar Processo</button>
 			</div>
 		</div>
 	)
